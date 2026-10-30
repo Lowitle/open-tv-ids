@@ -1,0 +1,23 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+artifacts/
+
+## Resultados de las pruebas
+TestResults/
+*.trx
+
+## IDE
+.vs/
+.vscode/
+.idea/
+*.DotSettings.user
+
+## Sistema operativo
+Thumbs.db
+.DS_Store
+
+## Caché del constructor, cuando se le pasa una carpeta del repositorio con --cache
+.cache/

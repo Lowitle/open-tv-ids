@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Lowitle/open-tv-ids/schema/series.schema.json",
+  "title": "open-tv-ids record",
+  "description": "One line of data/<emitter>/series.jsonl: the identifiers of a programme of a catalog in Wikidata, IMDb, TMDB and TVDB, with the evidence the match is based on.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "emitter", "emitterId", "kind", "title", "ids", "sources", "match"],
+  "properties": {
+    "id": {
+      "description": "Global id of the record: the emitter and the id of the work in its catalog.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*:[^:]+$",
+      "examples": ["3cat:73476"]
+    },
+    "emitter": {
+      "description": "Catalog the id of the work belongs to.",
+      "type": "string",
+      "enum": ["3cat", "rtve"]
+    },
+    "emitterId": {
+      "description": "Id of the work in the catalog of the emitter (programatv_id in 3Cat).",
+      "type": "string",
+      "pattern": "^[^:]+$"
+    },
+    "kind": {
+      "description": "Kind of work, in ASCII. It is the category of the emitter translated, not the type of Wikidata.",
+      "type": "string",
+      "enum": [
+        "series",
+        "animation",
+        "anime",
+        "film",
+        "documentary",
+        "news",
+        "magazine",
+        "contest",
+        "humour",
+        "music",
+        "theatre",
+        "sports",
+        "entertainment",
+        "special",
+        "unknown"
+      ]
+    },
+    "category": {
+      "description": "Category of the emitter, untranslated («Sèrie», «Animació»...).",
+      "type": "string"
+    },
+    "title": {
+      "description": "Title of the work in the catalog of the emitter, in the language of the catalog.",
+      "type": "string",
+      "minLength": 1
+    },
+    "originalTitle": {
+      "description": "Original title, only when the catalog publishes one and it differs from the local one.",
+      "type": "string",
+      "minLength": 1
+    },
+    "availableSince": {
+      "description": "Day the oldest video of the work available in the catalog was published. It is the date of the catalog, not the premiere of the work: a licensed series of 2015 can be filed under 2025.",
+      "type": "string",
+      "format": "date"
+    },
+    "ids": {
+      "description": "Identifiers of the work, keyed by catalog.",
+      "type": "object",
+      "minProperties": 1,
+      "required": ["wikidata"],
+      "properties": {
+        "wikidata": {
+          "description": "Item of Wikidata (P345 of the item, read from the article of a Wikipedia).",
+          "type": "string",
+          "pattern": "^Q[0-9]{1,12}$"
+        },
+        "imdb": {
+          "description": "IMDb id (P345).",
+          "type": "string",
+          "pattern": "^tt[0-9]{7,9}$"
+        },
+        "tmdb": {
+          "description": "TMDB id: the id of the TV series (P4983) or, for a film, the id of the film (P4947).",
+          "type": "string",
+          "pattern": "^[0-9]{1,9}$"
+        },
+        "tvdb": {
+          "description": "TVDB id (P4835).",
+          "type": "string",
+          "pattern": "^[0-9]{1,9}$"
+        }
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "sources": {
+      "description": "Where the record comes from, so a consumer can check it.",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^(wikidata:Q[0-9]{1,12}|wikipedia:[a-z-]{2,12}:.+|manual)$"
+      }
+    },
+    "match": {
+      "description": "How the record was matched.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "confidence", "verified"],
+      "properties": {
+        "method": {
+          "description": "wikidata when the matcher found it, manual when a person corrected it in overrides/<emitter>.json.",
+          "type": "string",
+          "enum": ["wikidata", "manual"]
+        },
+        "confidence": {
+          "description": "Confidence of the match, from 0 to 1. The dataset publishes from 0.90.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "verified": {
+          "description": "Whether a second, independent source confirms the identifiers.",
+          "type": "boolean"
+        }
+      }
+    },
+    "firstSeen": {
+      "description": "Day the record was published for the first time.",
+      "type": "string",
+      "format": "date"
+    },
+    "lastSeen": {
+      "description": "Day the record was computed.",
+      "type": "string",
+      "format": "date"
+    }
+  }
+}

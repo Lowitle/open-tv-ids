@@ -1,0 +1,55 @@
+name: refresh
+
+# Rehace el dataset a partir del volcado que está en `input/` y publica el resultado si cambia. No
+# descarga catálogos: eso lo hace el repositorio del emisor (ver input/README.md); esto refresca el lado
+# de Wikidata, que es el que sí cambia solo.
+on:
+  schedule:
+    # Todos los lunes a las 04:00 UTC.
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Caché de las respuestas de Wikipedia y Wikidata
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/ids-cache
+          key: open-tv-ids-${{ github.run_id }}
+          restore-keys: open-tv-ids-
+
+      - name: Construir el dataset
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: >-
+          dotnet run --project src/IdsBuilder --configuration Release --
+          --cache "$RUNNER_TEMP/ids-cache"
+
+      - name: Publicar los cambios
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data report
+          if git diff --cached --quiet; then
+            echo "Sin cambios: el dataset ya estaba al día."
+            exit 0
+          fi
+          git commit -m "dataset: refresco de $(date -u +%Y-%m-%d)"
+          git push

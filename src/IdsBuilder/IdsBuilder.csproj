@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>OpenTvIds.IdsBuilder</RootNamespace>
+    <AssemblyName>OpenTvIds.IdsBuilder</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <!-- The builder is the tool of the repository; it is not published as a package. -->
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- The tool runs on whatever runtime is installed: a workstation with only the SDK of the next
+         major version must be able to run it. -->
+    <RollForward>Major</RollForward>
+  </PropertyGroup>
+
+</Project>

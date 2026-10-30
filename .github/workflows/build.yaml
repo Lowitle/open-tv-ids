@@ -1,0 +1,30 @@
+name: build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restaurar
+        run: dotnet restore open-tv-ids.sln
+
+      - name: Compilar
+        run: dotnet build open-tv-ids.sln --no-restore --configuration Release
+
+      - name: Probar
+        run: dotnet test open-tv-ids.sln --no-build --configuration Release --nologo
