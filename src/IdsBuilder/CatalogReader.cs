@@ -77,6 +77,7 @@ internal static class CatalogReader
                 Category = Field(row, columns, "category"),
                 Countries = Field(row, columns, "detail_countries"),
                 AvailableSince = Field(row, columns, "primera_emissio"),
+                Url = Field(row, columns, "url"),
                 IsTelevision = television
             });
         }

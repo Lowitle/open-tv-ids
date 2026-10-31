@@ -32,6 +32,7 @@ Opcionales, pero son las que hacen que el emparejamiento funcione:
 | `detail_original_title` | Título original («Dragon Ball Super»). Se busca antes que el título local en la segunda Wikipedia y es lo que encuentra las series dobladas. |
 | `detail_countries` | Países de origen publicados por la ficha. Se usa como pista. |
 | `primera_emissio` | Fecha (`AAAA-MM-DD`) del vídeo más antiguo disponible. Ojo: es la fecha del catálogo, no la del estreno. |
+| `url` | Página del programa en el catálogo del emisor (`https://www.3cat.cat/3cat/polonia/`). Es el enlace que abre quien revisa a mano para comprobar que los identificadores son de la obra. |
 
 Cualquier otra columna se ignora, así que un volcado puede llevar más información sin romper nada.
 

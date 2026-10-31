@@ -8,7 +8,7 @@ línea JSON por programa con los identificadores del mismo trabajo en **Wikidata
 **TVDB**:
 
 ```json
-{"id":"3cat:73476","emitter":"3cat","emitterId":"73476","kind":"anime","category":"Anime","title":"Bola de Drac Súper","originalTitle":"Dragon Ball Super","availableSince":"2025-06-06","ids":{"wikidata":"Q19839121","imdb":"tt4644488","tmdb":"62715","tvdb":"295068"},"sources":["wikidata:Q19839121","wikipedia:ca:Bola de Drac Súper"],"match":{"method":"wikidata","confidence":0.9,"verified":false},"firstSeen":"2026-10-29","lastSeen":"2026-10-30"}
+{"id":"3cat:73476","emitter":"3cat","emitterId":"73476","kind":"anime","category":"Anime","title":"Bola de Drac Súper","originalTitle":"Dragon Ball Super","availableSince":"2025-06-06","ids":{"wikidata":"Q19839121","imdb":"tt4644488","tmdb":"62715","tvdb":"295068"},"sources":["wikidata:Q19839121","wikipedia:ca:Bola de Drac Súper"],"match":{"method":"wikidata","confidence":0.9,"verified":false},"firstSeen":"2026-10-30","lastSeen":"2026-10-31"}
 ```
 
 El catálogo de 3Cat identifica cada programa con un `programatv_id` que no significa nada fuera de 3Cat.
@@ -37,16 +37,16 @@ open-tv-ids/
 ├── report/
 │   └── 3cat/
 │       ├── cobertura.md           # cobertura por categoría y qué queda pendiente (generado, versionado)
-│       └── revision.csv           # todos los programas con estado, evidencia y sugerencia (generado)
+│       └── revision.csv           # todos los programas con estado, evidencia, enlaces y sugerencia (generado)
 ├── schema/
 │   └── series.schema.json         # JSON Schema 2020-12 de cada línea
 ├── overrides/
-│   └── 3cat.json                  # correcciones manuales, que mandan sobre el matcher (a mano)
+│   └── 3cat.json                  # correcciones manuales, que mandan sobre el matcher (a mano o con --check)
 ├── input/
 │   ├── 3cat.csv                   # volcado del catálogo del emisor (ver input/README.md)
 │   └── README.md                  # contrato del volcado que tiene que producir un emisor
 ├── src/IdsBuilder/                # el constructor: lee el volcado y cruza con Wikidata
-├── tests/IdsBuilder.Tests/        # pruebas del normalizador, del scorer, del lector y del escritor
+├── tests/IdsBuilder.Tests/        # pruebas del normalizador, scorer, lector, escritor y revisión
 └── .github/workflows/             # build.yaml (compila y prueba) y refresh.yaml (rehace el dataset)
 ```
 
@@ -70,10 +70,14 @@ dotnet test open-tv-ids.sln
 
 Escribe `data/<emisor>/series.jsonl`, `report/<emisor>/revision.csv` y `report/<emisor>/cobertura.md`.
 Opciones: `--emitter <slug>`, `-i <csv>`, `-o <raíz>`, `--limit`, `--skip`, `--include-web`, `--accept`,
-`--review`, `--concurrency`, `--delay`, `--cache <dir>`, `--fresh`, `--offline`, `-v`. `--help` las lista.
+`--review`, `--concurrency`, `--delay`, `--cache <dir>`, `--fresh`, `--offline`, `--check`, `--all`,
+`--again`, `-v`. `--help` las lista.
 
 La caché de las respuestas de Wikipedia y Wikidata vive en la carpeta temporal del usuario (cambiable con
-`--cache`) y no se versiona: una segunda pasada solo pregunta por los programas cuyo título cambió.
+`--cache`) y no se versiona: una segunda pasada solo pregunta por los programas cuyo título cambió. Si el
+endpoint devolvió un 429 a media pasada, el hueco no se guarda: **repetir el volcado lo rellena** y es barato,
+porque solo pregunta por lo que falta (la última pasada completa, más una segunda de minuto y medio, recuperó
+44 programas que se habían quedado sin artículo por eso).
 
 ## Cómo se añade un emisor
 
@@ -119,6 +123,61 @@ emparejamiento.
 
 ## Cómo se corrige
 
+La revisión de lo que el matcher no tiene claro es manual, y hay dos maneras de hacerla: **pregunta a
+pregunta** en el terminal o **abriendo el CSV** en una hoja de cálculo. Las dos acaban en el mismo sitio,
+`overrides/<emisor>.json`.
+
+### Pregunta a pregunta
+
+```powershell
+dotnet run --project src/IdsBuilder -- --check
+```
+
+Recorre `report/<emisor>/revision.csv` de mayor a menor confianza y, para cada programa, enseña el título, el
+artículo que encontró y **los enlaces para comprobarlo de un vistazo**: la ficha del programa en el emisor,
+el elemento de Wikidata, el artículo de la Wikipedia y, si lo tiene, la ficha de IMDb.
+
+```
+[3/93] 3cat:61340 · Sèrie · revisar · confianza 0,85 · título exacto
+   Título:   Polònia
+   Artículo: ca:Polònia (Exact) · Q4887621
+   Ids:      wikidata Q4887621 · imdb tt0891508
+   Abrir:    https://www.3cat.cat/3cat/polonia/
+             https://www.wikidata.org/wiki/Q4887621
+             https://ca.wikipedia.org/wiki/Pol%C3%B2nia
+   ¿Es la misma obra? [s/v/n/o/d/q/?] >
+```
+
+| Tecla | Qué hace |
+| --- | --- |
+| `s` | Sí, es la misma obra: se publican esos identificadores. |
+| `v` | Sí, y además lo has comprobado en la ficha: el registro sale `"verified": true`. |
+| `n` | No es esta obra: el programa queda fuera del dataset. |
+| `o` | Otra ficha: pide el `Q…` (o pega el enlace de Wikidata) y **lee sus identificadores**. |
+| `d` o `Enter` | Dejarlo para luego. |
+| `q` | Salir. `?` repite la ayuda. |
+
+**Cada respuesta se guarda al momento** en `overrides/<emisor>.json`, así que la revisión se puede dejar a
+medias y retomar otro día: los programas ya decididos se saltan solos. Con `--all` entra también en los
+1.003 programas sin coincidencia (la segunda pasada, para las obras que existen pero que el matcher no
+encontró) y con `--again` vuelve a los que ya tienen corrección.
+
+Al terminar, se aplica al dataset sin tocar la red:
+
+```powershell
+dotnet run --project src/IdsBuilder -- --offline
+```
+
+### En la hoja de cálculo
+
+`report/<emisor>/revision.csv` lleva una columna `revisado` (`no`/`sí`), la `nota` de la corrección si ya
+existe y los enlaces `url_<emisor>` (`url_3cat`), `url_wikidata` y `url_suggerencia`, que la hoja abre con un
+clic. Las columnas `wikidata`/`imdb`/`tmdb`/`tvdb` muestran **lo que se publicaría** también en los programas
+en revisión, que es justo lo que hay que aceptar o rechazar. La hoja sirve para leer y filtrar; para escribir,
+`--check` o el JSON.
+
+### El fichero de correcciones
+
 `overrides/<emisor>.json` manda sobre el matcher y sobrevive a todos los volcados:
 
 ```json
@@ -127,13 +186,32 @@ emparejamiento.
     "id": "3cat:60336",
     "ids": { "wikidata": "Q82990385", "tmdb": "100000", "imdb": "tt1234567" },
     "note": "Confirmado en la ficha de TMDB; la Wikipedia catalana no tiene artículo.",
-    "verified": true
+    "verified": true,
+    "reject": false
+  },
+  {
+    "id": "3cat:76716",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
   }
 ]
 ```
 
 Los ids se validan igual que los de Wikidata (un `imdb` que no empiece por `tt` se descarta) y el registro
-sale con `"match": {"method": "manual", "confidence": 1, "verified": true}`.
+sale con `"match": {"method": "manual", "confidence": 1}` y el `verified` de la corrección. Tres detalles que
+importan:
+
+- Los `ids` **sustituyen** a los del matcher, no se mezclan: al corregir un falso positivo («Polònia», el
+  país, en lugar de «Polònia», el programa) no se queda ningún identificador del elemento equivocado. Por eso
+  la tecla `o` de la revisión lee el elemento que le dices y escribe **todos** sus identificadores; si editas
+  el JSON a mano y solo pones el `Q…`, el registro publica solo Wikidata.
+- `"reject": true` deja el programa fuera del dataset sin borrar la fila del informe: no vuelve a aparecer en
+  la revisión y en el CSV queda como `descartado`.
+- Las correcciones que hace `--check` llevan nota automática («revisado a mano», «descartado a mano: …»), que
+  sale en la columna `nota` del CSV y en la línea `Nota:` de la tarjeta la próxima vez que abras ese programa:
+  así se recuerda por qué se decidió.
 
 ## Cómo se consume
 
@@ -161,21 +239,21 @@ proveedores nativos:
 
 ## Cobertura del último volcado (3cat)
 
-1.349 programas de televisión procesados: **249 publicados** (18,5 %), 91 esperando revisión y 1.009 sin
-coincidencia. De los publicados, 242 llevan IMDb, 232 TMDB y 221 TVDB; los 249 llevan Wikidata.
+1.349 programas de televisión procesados: **253 publicados** (18,8 %), 93 esperando revisión y 1.003 sin
+coincidencia. De los publicados, 246 llevan IMDb, 236 TMDB y 226 TVDB; los 253 llevan Wikidata.
 
 | Categoría | Procesados | Publicados | Con TMDB |
 | --- | ---: | ---: | ---: |
-| Sèrie | 245 | 122 (49,8 %) | 131 |
-| Animació | 146 | 63 (43,2 %) | 74 |
+| Sèrie | 245 | 122 (49,8 %) | 130 |
+| Animació | 146 | 64 (43,8 %) | 75 |
 | Anime | 29 | 9 (31,0 %) | 15 |
 | Humor | 27 | 5 (18,5 %) | 6 |
 | Concurs | 53 | 7 (13,2 %) | 11 |
 | Magazín | 38 | 5 (13,2 %) | 6 |
-| Documental | 244 | 16 (6,6 %) | 28 |
-| Actualitat | 186 | 5 (2,7 %) | 13 |
+| Documental | 244 | 17 (7,0 %) | 29 |
+| Actualitat | 186 | 6 (3,2 %) | 14 |
 
-La ficción es donde el cruce funciona: la mitad de las series y el 43 % de la animación tienen artículo en
+La ficción es donde el cruce funciona: la mitad de las series y el 44 % de la animación tienen artículo en
 alguna Wikipedia. Los programas propios de la plataforma (documentales, informativos, deportes, magacines)
 casi nunca lo tienen, y ahí el dataset no puede llegar sin trabajo manual. Programa a programa, con la
 evidencia y la sugerencia de cada uno, está en [`report/3cat/cobertura.md`](report/3cat/cobertura.md) y
@@ -199,8 +277,8 @@ guarda el título del artículo citado en `sources`.
 
 ## Hoja de ruta
 
-- [ ] Revisar `report/3cat/revision.csv` y pasar a `overrides/3cat.json` los 91 programas que quedan a
-      medias.
+- [ ] Revisar `report/3cat/revision.csv` con `--check` y pasar a `overrides/3cat.json` los 93 programas que
+      quedan a medias.
 - [ ] Verificar con una segunda fuente (TMDB `/find`, TVmaze) los registros publicados, para poder escribir
       `"verified": true`.
 - [ ] Segundo emisor (**rtve**): confirmar su endpoint público de programas, escribir su volcado y añadirlo

@@ -37,9 +37,19 @@ jobs:
       - name: Construir el dataset
         env:
           RUNNER_TEMP: ${{ runner.temp }}
-        run: >-
-          dotnet run --project src/IdsBuilder --configuration Release --
-          --cache "$RUNNER_TEMP/ids-cache"
+        run: |
+          set -e
+
+          build() {
+            dotnet run --project src/IdsBuilder --configuration Release -- \
+              --cache "$RUNNER_TEMP/ids-cache"
+          }
+
+          # La primera pasada pregunta a Wikipedia por cada programa. Si el endpoint devuelve un 429 a media
+          # pasada, ese programa se queda sin artículo y sale del dataset; la segunda pasada es barata (la
+          # caché ya tiene las respuestas buenas) y solo vuelve a preguntar por lo que falta.
+          build
+          build
 
       - name: Publicar los cambios
         run: |

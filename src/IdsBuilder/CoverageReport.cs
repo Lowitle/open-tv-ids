@@ -34,6 +34,7 @@ internal static class CoverageReport
         var published = result.Records.Count;
         var publishedIds = result.Records.Select(record => record.Id).ToHashSet(StringComparer.Ordinal);
         var manual = outcomes.Count(outcome => outcome.Manual is not null);
+        var rejected = outcomes.Count(outcome => outcome.Manual is { Reject: true });
         var review = outcomes.Count(outcome => outcome.Manual is null && outcome.Verdict.State == MatchState.Review);
         var unmatched = outcomes.Count - published - review;
         var text = new StringBuilder();
@@ -54,6 +55,12 @@ internal static class CoverageReport
         Row(text, "Publicados en el dataset", published, outcomes.Count);
         Row(text, "En revisión", review, outcomes.Count);
         Row(text, "Sin coincidencia", unmatched, outcomes.Count);
+
+        if (rejected > 0)
+        {
+            Row(text, "Descartados a mano", rejected, outcomes.Count);
+        }
+
         text.AppendLine();
         text.Append("Umbrales: se publica desde ")
             .Append(Score(options.Accept))
@@ -62,7 +69,15 @@ internal static class CoverageReport
             .Append(". ")
             .Append(Num(manual))
             .Append(manual == 1 ? " registro viene" : " registros vienen")
-            .Append(" de `overrides/").Append(options.Emitter).AppendLine(".json`.");
+            .Append(" de `overrides/").Append(options.Emitter).Append(".json`");
+
+        if (rejected > 0)
+        {
+            text.Append(", ").Append(Num(rejected))
+                .Append(rejected == 1 ? " de ellos descartado" : " de ellos descartados");
+        }
+
+        text.AppendLine(".");
         text.AppendLine();
 
         text.AppendLine("## Identificadores publicados");
@@ -119,6 +134,12 @@ internal static class CoverageReport
                 .Append(" | ").Append(Article(outcome))
                 .AppendLine(" |");
         }
+
+        text.AppendLine();
+        text.Append("Para resolverlos de uno en uno, con los enlaces a la ficha del emisor y al elemento de Wikidata: ")
+            .Append("`dotnet run --project src/IdsBuilder -- --check` (guarda cada decisión en ")
+            .Append($"`overrides/{options.Emitter}.json`")
+            .AppendLine(").");
 
         text.AppendLine();
         text.AppendLine("## Ficción sin coincidencia");

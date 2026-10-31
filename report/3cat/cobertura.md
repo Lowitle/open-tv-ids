@@ -1,6 +1,6 @@
 # Cobertura de identificadores externos · 3cat
 
-Generado el 2026-10-30 a partir de `3cat.csv` con `IdsBuilder`.
+Generado el 2026-10-31 a partir de `3cat.csv` con `IdsBuilder`.
 Fuente de los identificadores: Wikidata (CC0), leída a través de los artículos de Wikipedia.
 
 ## Totales
@@ -8,9 +8,9 @@ Fuente de los identificadores: Wikidata (CC0), leída a través de los artículo
 | Métrica | Programas | Porcentaje |
 | --- | ---: | ---: |
 | Programas procesados | 1.349 | 100,0 % |
-| Publicados en el dataset | 249 | 18,5 % |
-| En revisión | 91 | 6,7 % |
-| Sin coincidencia | 1.009 | 74,8 % |
+| Publicados en el dataset | 253 | 18,8 % |
+| En revisión | 93 | 6,9 % |
+| Sin coincidencia | 1.003 | 74,4 % |
 
 Umbrales: se publica desde 0,90 de confianza y se revisa desde 0,70. 0 registros vienen de `overrides/3cat.json`.
 
@@ -18,25 +18,25 @@ Umbrales: se publica desde 0,90 de confianza y se revisa desde 0,70. 0 registros
 
 | Catálogo | Programas |
 | --- | ---: |
-| wikidata | 249 |
-| imdb | 242 |
-| tmdb | 232 |
-| tvdb | 221 |
+| wikidata | 253 |
+| imdb | 246 |
+| tmdb | 236 |
+| tvdb | 226 |
 
 ## Por categoría
 
 | Categoría | Procesados | Publicados | En revisión | Sin coincidencia | Con TMDB |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| (sin categoría) | 267 | 15 | 12 | 240 | 26 |
-| Sèrie | 245 | 122 | 13 | 110 | 131 |
-| Documental | 244 | 16 | 12 | 216 | 28 |
-| Actualitat | 186 | 5 | 9 | 172 | 13 |
-| Animació | 146 | 63 | 18 | 65 | 74 |
+| (sin categoría) | 267 | 16 | 13 | 238 | 28 |
+| Sèrie | 245 | 122 | 13 | 110 | 130 |
+| Documental | 244 | 17 | 12 | 215 | 29 |
+| Actualitat | 186 | 6 | 9 | 171 | 14 |
+| Animació | 146 | 64 | 18 | 64 | 75 |
 | Entreteniment | 64 | 2 | 5 | 57 | 7 |
 | Concurs | 53 | 7 | 9 | 37 | 11 |
 | Magazín | 38 | 5 | 4 | 29 | 6 |
 | Esports | 34 | 0 | 2 | 32 | 1 |
-| Anime | 29 | 9 | 2 | 18 | 15 |
+| Anime | 29 | 9 | 3 | 17 | 15 |
 | Humor | 27 | 5 | 4 | 18 | 6 |
 | Música | 10 | 0 | 0 | 10 | 0 |
 | Teatre | 4 | 0 | 1 | 3 | 1 |
@@ -70,6 +70,8 @@ Los 20 programas con más evidencia que no llegan al umbral:
 | 72196 | El riu de la vida | 0,80 | título con calificador, calificador «pel·lícula de 1992», TMDB | El riu de la vida (pel·lícula de 1992) (ca, Q581906) |
 | 55536 | El sopar | 0,80 | título exacto, TMDB | El Sopar (en, Q5352203) |
 
+Para resolverlos de uno en uno, con los enlaces a la ficha del emisor y al elemento de Wikidata: `dotnet run --project src/IdsBuilder -- --check` (guarda cada decisión en `overrides/3cat.json`).
+
 ## Ficción sin coincidencia
 
 Series, animación y cine que no se han podido casar (primeros 20 por antigüedad del id):
@@ -90,12 +92,12 @@ Series, animación y cine que no se han podido casar (primeros 20 por antigüeda
 | 46556 | Ermessenda | — | Ermessenda de Carcassona (ca) |
 | 46659 | La Lua i el món | — | K3 (ca) |
 | 46716 | Megaminimals | Megaminimals | Josep Lluís Viciana i Monfort (ca) |
-| 46856 | Sherlock | — | — |
 | 46976 | Dues dones divines | — | Mercè Pons i Veiga (ca) |
 | 47156 | Hawthorne | — | — |
 | 47176 | Els Extraordinaris | — | Consistori papal (ca) |
 | 47536 | L'illa del far | L'illa del Far | Illes Cíes (ca) |
 | 47556 | Lila | Lila | Lila Kedrova (ca) |
+| 48636 | Benvinguts a Patatamón! | — | Canal 3XL (ca) |
 
 ## Elementos compartidos
 
@@ -120,5 +122,5 @@ El título del catálogo se busca en la Wikipedia catalana; si no aparece, el t�
 
 Un año que no coincide no resta: la fecha del catálogo es la de alta en 3Cat, no la de estreno.
 
-Tiempo del volcado: 4:46.
+Tiempo del volcado: 0:04.
 

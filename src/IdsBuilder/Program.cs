@@ -63,6 +63,11 @@ internal static class Program
 
         try
         {
+            if (options.Check)
+            {
+                return await CheckAsync(options, cancellation.Token).ConfigureAwait(false);
+            }
+
             var overrides = Overrides.Read(options.OverridesPath, Warn);
             using var wikidata = new WikidataClient(options.UserAgent, options.Delay, !options.Offline, Warn);
             var cache = new Cache(options.CacheDir, !options.Fresh, Warn);
@@ -123,6 +128,40 @@ internal static class Program
             : (100.0 * value / total).ToString("0.0", CultureInfo.InvariantCulture) + " %";
 
     /// <summary>
+    /// Reviews the programmes of the review file with a person, which is the other half of a build: the tool
+    /// matches what it can and the person decides what is left.
+    /// </summary>
+    /// <param name="options">Options, with the emitter and the root of the repository.</param>
+    /// <param name="cancellationToken">Token to stop the review.</param>
+    /// <returns>0 when the review ended, 1 when there is no review file.</returns>
+    private static async Task<int> CheckAsync(Options options, CancellationToken cancellationToken)
+    {
+        if (!File.Exists(options.ReviewPath))
+        {
+            Console.Error.WriteLine(
+                $"No existe «{options.ReviewPath}»: genera el informe con un volcado normal y vuelve a --check.");
+
+            return 1;
+        }
+
+        using var wikidata = new WikidataClient(options.UserAgent, options.Delay, !options.Offline, Warn);
+
+        Func<string, CancellationToken, Task<EntityFacts?>>? resolve = options.Offline
+            ? null
+            : async (qid, token) =>
+            {
+                var items = await wikidata.GetFactsAsync([qid], token).ConfigureAwait(false);
+
+                return items.GetValueOrDefault(qid);
+            };
+
+        var session = new ReviewSession(options, Console.In, Console.Out, resolve);
+        var rows = RevisionSheet.Load(options.ReviewPath, options.Emitter);
+
+        return await session.RunAsync(rows, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Reads the command line.
     /// </summary>
     /// <param name="args">Arguments.</param>
@@ -180,6 +219,15 @@ internal static class Program
                 case "--offline":
                     options.Offline = true;
                     break;
+                case "--check":
+                    options.Check = true;
+                    break;
+                case "--all":
+                    options.CheckAll = true;
+                    break;
+                case "--again":
+                    options.CheckAgain = true;
+                    break;
                 case "-v":
                 case "--verbose":
                     options.Verbose = true;
@@ -200,7 +248,10 @@ internal static class Program
                 throw new ArgumentException("--review no puede ser mayor que --accept.");
             }
 
-            options.InputPath = FindInput(options.InputPath);
+            if (!options.Check)
+            {
+                options.InputPath = FindInput(options.InputPath);
+            }
         }
 
         return options;
@@ -268,6 +319,9 @@ internal static class Program
                   --user-agent <ua>   User-Agent de las peticiones a Wikipedia y Wikidata.
                   --fresh             Ignora la caché y vuelve a preguntar.
                   --offline           No usa la red: solo la caché (para regenerar los informes).
+                  --check             Revisa a mano report/<emisor>/revision.csv, programa a programa.
+                  --all               Con --check, incluye también los programas sin coincidencia.
+                  --again             Con --check, vuelve a los programas que ya tienen corrección.
               -v, --verbose           Muestra los avisos de los endpoints.
               -h, --help              Muestra esta ayuda.
 
@@ -276,6 +330,13 @@ internal static class Program
               report/<emisor>/revision.csv  Todos los programas con el estado y la evidencia.
               report/<emisor>/cobertura.md   Cobertura por categoría y qué queda por revisar.
               overrides/<emisor>.json       Correcciones manuales, que mandan sobre el matcher.
+
+            Revisión:
+              --check recorre el informe pregunta a pregunta y enseña, de cada programa, la ficha del emisor
+              y el elemento de Wikidata para comprobarlo de un vistazo (s = sí, v = sí y verificado, n = no,
+              o = otra ficha, d = después, q = salir). Cada respuesta se guarda al momento en
+              overrides/<emisor>.json, así que la revisión se puede dejar a medias; después, un volcado con
+              --offline la aplica al dataset.
 
             Detalles:
               El título del catálogo (y el original, si lo publica) se busca en las Wikipedias catalana,

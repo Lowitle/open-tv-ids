@@ -14,10 +14,19 @@ namespace OpenTvIds.IdsBuilder;
 /// </remarks>
 internal static class DatasetWriter
 {
-    /// <summary>Columns of the review file.</summary>
-    private static readonly string[] ReviewColumns =
+    /// <summary>
+    /// Columns of the review file, in the order a person reads them.
+    /// </summary>
+    /// <param name="emitter">Emitter of the programmes, which names the column of the page of the programme.</param>
+    /// <returns>The columns.</returns>
+    /// <remarks>
+    /// The column of the page is named after the emitter (<c>url_3cat</c>) because a report of another emitter
+    /// shows the pages of that emitter, and the review uses it as the first link to open.
+    /// </remarks>
+    private static string[] ReviewColumns(string emitter) =>
     [
         "id",
+        "revisado",
         "categoria",
         "tipo",
         "estado",
@@ -25,6 +34,8 @@ internal static class DatasetWriter
         "evidencia",
         "titol",
         "titol_original",
+        $"url_{emitter}",
+        "url_wikidata",
         "article_wiki",
         "article_titol",
         "article_qid",
@@ -35,6 +46,7 @@ internal static class DatasetWriter
         "tvdb",
         "suggerencia",
         "suggerencia_qid",
+        "url_suggerencia",
         "nota"
     ];
 
@@ -75,16 +87,18 @@ internal static class DatasetWriter
             NewLine = "\r\n"
         };
 
-        WriteRow(writer, ReviewColumns);
+        WriteRow(writer, ReviewColumns(emitter));
 
         var records = result.Records.ToDictionary(record => record.Id, StringComparer.Ordinal);
 
         foreach (var outcome in result.Outcomes)
         {
             var record = records.GetValueOrDefault($"{emitter}:{outcome.Program.Id}");
+            var qid = Identifier(outcome, record, "wikidata");
 
             WriteRow(writer, [
                 outcome.Program.Id,
+                outcome.Manual is null ? "no" : "sí",
                 outcome.Program.Category,
                 outcome.Program.Kind,
                 State(outcome),
@@ -92,16 +106,19 @@ internal static class DatasetWriter
                 outcome.Verdict.Evidence,
                 outcome.Program.Title,
                 outcome.Program.OriginalTitle,
+                Urls.Program(outcome.Program.Url),
+                Urls.Wikidata(qid),
                 outcome.Article?.Hit.Language,
                 outcome.Article?.Hit.Title,
                 outcome.Article?.Hit.Qid,
                 outcome.Article?.Match.ToString(),
-                record?.Ids.GetValueOrDefault("wikidata"),
-                record?.Ids.GetValueOrDefault("imdb"),
-                record?.Ids.GetValueOrDefault("tmdb"),
-                record?.Ids.GetValueOrDefault("tvdb"),
+                qid,
+                Identifier(outcome, record, "imdb"),
+                Identifier(outcome, record, "tmdb"),
+                Identifier(outcome, record, "tvdb"),
                 outcome.Suggestion?.Title,
                 outcome.Suggestion?.Qid,
+                Urls.Wikidata(outcome.Suggestion?.Qid),
                 outcome.Manual?.Note
             ]);
         }
@@ -113,14 +130,48 @@ internal static class DatasetWriter
     /// <param name="outcome">The programme.</param>
     /// <returns>The state.</returns>
     internal static string State(Outcome outcome)
-        => outcome.Manual is not null
-            ? "publicado (manual)"
-            : outcome.Verdict.State switch
+        => outcome.Manual switch
+        {
+            { Reject: true } => "descartado",
+            not null => "publicado (manual)",
+            _ => outcome.Verdict.State switch
             {
                 MatchState.Accepted => "publicado",
                 MatchState.Review => "revisar",
                 _ => "sin_match"
-            };
+            }
+        };
+
+    /// <summary>
+    /// Reads the identifier a programme would publish, which is what a person accepts or rejects in the
+    /// review: the one of the record when it is published and the one of the item the matcher chose when it
+    /// is not.
+    /// </summary>
+    /// <param name="outcome">The programme.</param>
+    /// <param name="record">Its record, or <c>null</c> when it is not published.</param>
+    /// <param name="catalog">The catalog (<c>wikidata</c>, <c>imdb</c>...).</param>
+    /// <returns>The identifier, or <c>null</c>.</returns>
+    /// <remarks>
+    /// Without the second half a person could not decide on a programme under review: the review file only
+    /// showed the identifiers of the records that were already published, which are exactly the ones that
+    /// needed no decision.
+    /// </remarks>
+    internal static string? Identifier(Outcome outcome, SeriesIdRecord? record, string catalog)
+    {
+        if (outcome.Manual is { Reject: true })
+        {
+            return null;
+        }
+
+        return record?.Ids.GetValueOrDefault(catalog) ?? catalog switch
+        {
+            "wikidata" => ExternalIds.Wikidata(outcome.Facts?.Qid ?? outcome.Article?.Hit.Qid),
+            "imdb" => ExternalIds.Imdb(outcome.Facts?.Imdb),
+            "tmdb" => ExternalIds.Tmdb(outcome.Facts?.AnyTmdb),
+            "tvdb" => ExternalIds.Tvdb(outcome.Facts?.Tvdb),
+            _ => null
+        };
+    }
 
     /// <summary>
     /// Formats a confidence with a comma, as the rest of the file does.

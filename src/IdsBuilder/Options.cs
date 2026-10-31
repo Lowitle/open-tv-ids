@@ -70,6 +70,28 @@ internal sealed class Options
     /// <summary>Gets or sets a value indicating whether the help is shown instead of building.</summary>
     public bool Help { get; set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether the review file is opened for a person instead of building the
+    /// dataset.
+    /// </summary>
+    public bool Check { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the review also asks about the programmes without a match.
+    /// </summary>
+    /// <remarks>
+    /// They are more than the ones under review and most of them are not works the catalogs have (a programme
+    /// of the house, a live show), so they are the second pass and not the default: the review starts with
+    /// the programmes the matcher almost found.
+    /// </remarks>
+    public bool CheckAll { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the review asks again about the programmes that already have a
+    /// correction.
+    /// </summary>
+    public bool CheckAgain { get; set; }
+
     /// <summary>Gets or sets the user agent.</summary>
     public string UserAgent { get; set; } = DefaultUserAgent;
 

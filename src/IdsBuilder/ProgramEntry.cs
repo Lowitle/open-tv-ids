@@ -41,6 +41,12 @@ internal sealed record ProgramEntry
     /// </summary>
     public string? AvailableSince { get; init; }
 
+    /// <summary>
+    /// Gets the page of the programme in the catalog of the emitter, which is what a person opens to check
+    /// that the identifiers found belong to the work.
+    /// </summary>
+    public string? Url { get; init; }
+
     /// <summary>Gets a value indicating whether the programme is a television programme.</summary>
     public bool IsTelevision { get; init; }
 
