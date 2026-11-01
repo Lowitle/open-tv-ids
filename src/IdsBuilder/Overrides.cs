@@ -107,7 +107,7 @@ internal static class Overrides
 
         if (manual.Reject)
         {
-            record.Match.Method = "manual";
+            record.Match.Method = SeriesMatchInfo.ManualMethod;
             record.Match.Confidence = 1;
             record.Match.Verified = false;
 
@@ -123,7 +123,7 @@ internal static class Overrides
             }
         }
 
-        record.Match.Method = "manual";
+        record.Match.Method = SeriesMatchInfo.ManualMethod;
         record.Match.Confidence = 1;
         record.Match.Verified = manual.Verified;
 

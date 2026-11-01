@@ -104,6 +104,16 @@ internal sealed class Options
     /// <summary>Gets the path of the coverage report.</summary>
     public string ReportPath => Path.Combine(OutputDir, "report", Emitter, "cobertura.md");
 
+    /// <summary>
+    /// Gets the path of the catalog for Mix'n'match, which is the file a curator uploads to the import tool of
+    /// the community.
+    /// </summary>
+    /// <remarks>
+    /// It is not under <c>report/</c> because it is not a report of the build but the sheet another tool
+    /// imports, and <c>refresh.yaml</c> publishes it next to the dataset.
+    /// </remarks>
+    public string MixNMatchPath => Path.Combine(OutputDir, "mixnmatch", Emitter + ".tsv");
+
     /// <summary>Gets the path of the manual overrides of the emitter.</summary>
     public string OverridesPath => Path.Combine(OutputDir, "overrides", Emitter + ".json");
 

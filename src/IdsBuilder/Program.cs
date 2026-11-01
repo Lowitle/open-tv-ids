@@ -79,7 +79,10 @@ internal static class Program
             DatasetWriter.WriteReview(options.ReviewPath, options.Emitter, result);
             CoverageReport.Write(options.ReportPath, result, options, DateOnly.FromDateTime(DateTime.UtcNow));
 
-            Summary(result, options);
+            var mixnmatch = MixNMatchSheet.Create(options.Emitter, result, options.Verbose ? Warn : null);
+            MixNMatchSheet.Write(options.MixNMatchPath, mixnmatch);
+
+            Summary(result, options, mixnmatch);
 
             return 0;
         }
@@ -103,7 +106,8 @@ internal static class Program
     /// </summary>
     /// <param name="result">The result of the build.</param>
     /// <param name="options">Options of the build.</param>
-    private static void Summary(BuildResult result, Options options)
+    /// <param name="mixnmatch">The catalog written for Mix'n'match.</param>
+    private static void Summary(BuildResult result, Options options, MixNMatchCatalog mixnmatch)
     {
         var total = result.Outcomes.Count;
         var published = result.Records.Count;
@@ -117,9 +121,16 @@ internal static class Program
         {
             Console.WriteLine($"   {result.Linked} de ellos salen del identificador de su ficha en Wikidata, sin buscar por título.");
         }
+        if (mixnmatch.Entries > 0)
+        {
+            Console.WriteLine($"   {mixnmatch.Entries} fichas para Mix'n'match: {mixnmatch.Certain} ya casadas, "
+                + $"{mixnmatch.Guess} por confirmar y {mixnmatch.Pending} para la comunidad.");
+        }
+
         Console.WriteLine($"   {Path.GetFullPath(options.DatasetPath)}");
         Console.WriteLine($"   {Path.GetFullPath(options.ReviewPath)}");
         Console.WriteLine($"   {Path.GetFullPath(options.ReportPath)}");
+        Console.WriteLine($"   {Path.GetFullPath(options.MixNMatchPath)}");
 
         if (options.Offline)
         {
@@ -334,6 +345,7 @@ internal static class Program
               data/<emisor>/series.jsonl    Una línea por programa publicado (ver schema/series.schema.json).
               report/<emisor>/revision.csv  Todos los programas con el estado y la evidencia.
               report/<emisor>/cobertura.md   Cobertura por categoría y qué queda por revisar.
+              mixnmatch/<emisor>.tsv        El mismo catálogo para importarlo en Mix'n'match.
               overrides/<emisor>.json       Correcciones manuales, que mandan sobre el matcher.
 
             Revisión:
@@ -342,6 +354,14 @@ internal static class Program
               o = otra ficha, d = después, q = salir). Cada respuesta se guarda al momento en
               overrides/<emisor>.json, así que la revisión se puede dejar a medias; después, un volcado con
               --offline la aplica al dataset.
+
+            Colaboración:
+              mixnmatch/<emisor>.tsv es el catálogo entero en el formato del importador de Mix'n'match: una
+              fila por programa, con el slug de su ficha como id, la categoría y el título original en desc, y
+              «q» o «autoq» en los que el volcado ya casa (q = lo dice Wikidata o lo confirmó una persona,
+              autoq = lo encontró una búsqueda por título y conviene confirmarlo). Se importa con la propiedad
+              P10356 del emisor, así que cuando un voluntario casa una fila Mix'n'match escribe el
+              identificador en el elemento y el siguiente volcado publica el programa sin buscar el título.
 
             Detalles:
               El título del catálogo (y el original, si lo publica) se busca en las Wikipedias catalana,

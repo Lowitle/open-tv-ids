@@ -103,6 +103,12 @@ Los 20 programas con más evidencia que no llegan al umbral:
 
 Para resolverlos de uno en uno, con los enlaces a la ficha del emisor y al elemento de Wikidata: `dotnet run --project src/IdsBuilder -- --check` (guarda cada decisión en `overrides/3cat.json`).
 
+## Colaboración (Mix'n'match)
+
+`mixnmatch/3cat.tsv` es el catálogo entero en el formato que importa Mix'n'match: una fila por programa, con el slug de su ficha como `id`, la categoría y el título original en `desc` y el elemento en `q` o `autoq`. 1.349 fichas: 345 ya casadas con certeza, 115 por confirmar y 889 esperando a que alguien las case.
+
+El identificador de cada fila es el valor de `P10356`, así que el catálogo se importa con esa propiedad: cuando un voluntario casa una fila, Mix'n'match escribe el identificador en el elemento y el siguiente volcado publica el programa, sin buscar el título.
+
 ## Ficción sin coincidencia
 
 Series, animación y cine que no se han podido casar (primeros 20 por antigüedad del id):
@@ -141,7 +147,7 @@ Elementos de Wikidata que publican varios programas. Puede ser legítimo (una se
 
 ## Cómo se decide
 
-Antes de buscar nada, el build lee el identificador de la ficha que Wikidata ya declara (`P10356`, «TV3 show ID»): si existe, ese elemento es el del programa y no hay nada que puntuar. Para el resto:
+Antes de buscar nada, el build lee el identificador de la ficha que Wikidata ya declara (`P10356`, «3Cat show ID»): si existe, ese elemento es el del programa y no hay nada que puntuar. Para el resto:
 
 El título del catálogo se busca en la Wikipedia catalana; si no aparece, el título original se busca en la inglesa y luego en la española. Se puntúa cada uno de los tres primeros artículos candidatos y gana el que más suma:
 
@@ -155,5 +161,5 @@ El título del catálogo se busca en la Wikipedia catalana; si no aparece, el t�
 
 Un año que no coincide no resta: la fecha del catálogo es la de alta en 3Cat, no la de estreno.
 
-Tiempo del volcado: 0:01.
+Tiempo del volcado: 0:16.
 

@@ -43,9 +43,22 @@ internal static class ShowIds
     /// </remarks>
     internal static ShowIdLink? LinkOf(string emitter) => emitter switch
     {
-        "3cat" => new ShowIdLink("P10356", program => program.Slug ?? Slug(program.Url)),
+        "3cat" => new ShowIdLink("P10356", PageOf),
         _ => null
     };
+
+    /// <summary>
+    /// Reads the slug of the page of a programme, which is the value its identifier has in Wikidata.
+    /// </summary>
+    /// <param name="program">The programme.</param>
+    /// <returns>The slug, or <c>null</c> when the dump publishes neither the column nor the address.</returns>
+    /// <remarks>
+    /// The column wins over the address, and an empty value is an absent one: the dump publishes <c>slug</c> in
+    /// every row but leaves it blank when the page has no address yet, and the empty string would hide the
+    /// address that the same row does publish.
+    /// </remarks>
+    internal static string? PageOf(ProgramEntry program)
+        => string.IsNullOrWhiteSpace(program.Slug) ? Slug(program.Url) : program.Slug.Trim();
 
     /// <summary>
     /// Reads the slug of a page from the address of the page (<c>els-barrufets-3d</c>).

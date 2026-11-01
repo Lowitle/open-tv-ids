@@ -42,6 +42,8 @@ open-tv-ids/
 │   └── 3cat/
 │       ├── cobertura.md           # cobertura por categoría y qué queda pendiente (generado, versionado)
 │       └── revision.csv           # todos los programas con estado, evidencia, enlaces y sugerencia (generado)
+├── mixnmatch/
+│   └── 3cat.tsv                   # el catálogo entero para Mix'n'match, una fila por programa (generado, versionado)
 ├── schema/
 │   └── series.schema.json         # JSON Schema 2020-12 de cada línea
 ├── overrides/
@@ -54,7 +56,8 @@ open-tv-ids/
 └── .github/workflows/             # build.yaml (compila y prueba) y refresh.yaml (rehace el dataset)
 ```
 
-`data/`, `report/` e `input/` son datos; `schema/`, `overrides/` y el código son lo que se mantiene a mano.
+`data/`, `report/`, `mixnmatch/` e `input/` son datos; `schema/`, `overrides/` y el código son lo que se
+mantiene a mano.
 
 ## Cómo se genera
 
@@ -228,6 +231,30 @@ importan:
   sale en la columna `nota` del CSV y en la línea `Nota:` de la tarjeta la próxima vez que abras ese programa:
   así se recuerda por qué se decidió.
 
+### En Mix'n'match (en abierto)
+
+`mixnmatch/<emisor>.tsv` es el catálogo entero en el formato que importa
+[Mix'n'match](https://meta.wikimedia.org/wiki/Mix%27n%27match/Import), para que la cola de revisión no dependa
+de una sola persona: una fila por programa, con el *slug* de su ficha como `id`, la categoría y el título
+original en `desc`, y el elemento en `q` o en `autoq`.
+
+| Columna | Qué lleva |
+| --- | --- |
+| `id` | El *slug* de la ficha (`els-barrufets-3d`), que es el valor de `P10356`: el catálogo se importa con esa propiedad y no necesita ninguna columna de propiedad. |
+| `name` | El título del programa en el catálogo del emisor. |
+| `desc` | La categoría y el título original («Anime · Dragon Ball Super»), que es lo que ayuda a encontrar la obra. |
+| `url` | La ficha del programa en el catálogo del emisor. |
+| `q` | El elemento que **sabemos** que es: lo declara Wikidata (`wikidata-id`) o lo confirmó una persona (`manual`). Mix'n'match lo da por casado. |
+| `autoq` | El elemento que **parece**: lo encontró una búsqueda por título, y el voluntario lo confirma o lo corrige. |
+
+El circuito se cierra solo: Mix'n'match escribe `P10356 = <slug>` en el elemento que casa un voluntario y el
+siguiente volcado lo lee como identificador, sin buscar el título (paso 1 de «Cómo se empareja»). Y sirve
+también para lo contrario, que es como se encontraron los dos emparejamientos que el título confundía: una
+ficha con el `autoq` mal apuntado se ve de un vistazo en el catálogo y se arregla con `--check` o editando
+`overrides/`.
+
+Hoy son 1.349 fichas: 345 casadas con certeza, 115 por confirmar y 889 para la comunidad.
+
 ## Cómo se consume
 
 ```csharp
@@ -277,7 +304,8 @@ La ficción es donde el cruce funciona: casi tres cuartas partes de las series y
 animación ya tienen ficha. Los programas propios de la plataforma (documentales, informativos, deportes,
 magacines) siguen lejos, porque ni tienen artículo ni están dados de alta en Wikidata. Programa a programa,
 con la evidencia y la sugerencia de cada uno, está en [`report/3cat/cobertura.md`](report/3cat/cobertura.md) y
-[`report/3cat/revision.csv`](report/3cat/revision.csv).
+[`report/3cat/revision.csv`](report/3cat/revision.csv). Las **889** fichas que siguen sin elemento están en
+[`mixnmatch/3cat.tsv`](mixnmatch/3cat.tsv), el catálogo que puede casar la comunidad.
 
 ## Límites
 
@@ -300,9 +328,10 @@ guarda el título del artículo citado en `sources`.
 - [x] Leer el identificador de la ficha que Wikidata ya declara (`P10356`): 207 registros que el título no
       encontraba y dos emparejamientos corregidos.
 - [ ] Revisar con `--check` los 61 programas que quedan a medias y pasarlos a `overrides/3cat.json`.
-- [ ] Llevar el catálogo a **Mix'n'match** (`mixnmatch/3cat.tsv`, con `P10356` y los candidatos en `autoq`)
-      para que la comunidad confirme en abierto lo que el matcher no tiene claro, rellene `P10356` en Wikidata
-      y el siguiente volcado lo lea sin trabajo manual.
+- [x] Llevar el catálogo a **Mix'n'match** (`mixnmatch/3cat.tsv`, con `P10356` como identificador de la fila
+      y el candidato en `autoq`): 1.349 fichas, 345 ya casadas, 115 por confirmar y 889 para la comunidad.
+- [ ] Que la comunidad case las 889 que quedan en el catálogo de Mix'n'match: lo que rellene aparece en
+      `P10356` y el siguiente volcado lo publica solo, sin tocar una línea de código.
 - [ ] Verificar con una segunda fuente (TMDB `/find`, TVmaze) los registros publicados, para poder escribir
       `"verified": true`.
 - [ ] Segundo emisor (**rtve**): confirmar su endpoint público de programas, escribir su volcado y añadirlo

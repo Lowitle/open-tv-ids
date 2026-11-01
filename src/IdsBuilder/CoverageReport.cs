@@ -183,6 +183,28 @@ internal static class CoverageReport
             .AppendLine(").");
 
         text.AppendLine();
+        text.AppendLine("## Colaboración (Mix'n'match)");
+        text.AppendLine();
+
+        var sheet = MixNMatchSheet.Create(options.Emitter, result);
+
+        text.Append("`mixnmatch/").Append(options.Emitter)
+            .Append(".tsv` es el catálogo entero en el formato que importa Mix'n'match: una fila por programa, con el slug de su ficha como `id`, la categoría y el título original en `desc` y el elemento en `q` o `autoq`. ")
+            .Append(Num(sheet.Entries)).Append(" fichas: ")
+            .Append(Num(sheet.Certain)).Append(" ya casadas con certeza, ")
+            .Append(Num(sheet.Guess)).Append(" por confirmar y ")
+            .Append(Num(sheet.Pending)).AppendLine(" esperando a que alguien las case.");
+        text.AppendLine();
+
+        text.AppendLine("El identificador de cada fila es el valor de `P10356`, así que el catálogo se importa con esa propiedad: cuando un voluntario casa una fila, Mix'n'match escribe el identificador en el elemento y el siguiente volcado publica el programa, sin buscar el título.");
+
+        if (sheet.WithoutPage > 0 || sheet.Repeated > 0)
+        {
+            text.Append("Fuera de la hoja: ").Append(Num(sheet.WithoutPage)).Append(" programas sin ficha propia y ")
+                .Append(Num(sheet.Repeated)).AppendLine(" que repiten la ficha de otro programa.");
+        }
+
+        text.AppendLine();
         text.AppendLine("## Ficción sin coincidencia");
         text.AppendLine();
         text.Append("Series, animación y cine que no se han podido casar (primeros ").Append(Sample)
@@ -235,7 +257,7 @@ internal static class CoverageReport
         text.AppendLine();
         text.AppendLine("## Cómo se decide");
         text.AppendLine();
-        text.AppendLine("Antes de buscar nada, el build lee el identificador de la ficha que Wikidata ya declara (`P10356`, «TV3 show ID»): si existe, ese elemento es el del programa y no hay nada que puntuar. Para el resto:");
+        text.AppendLine("Antes de buscar nada, el build lee el identificador de la ficha que Wikidata ya declara (`P10356`, «3Cat show ID»): si existe, ese elemento es el del programa y no hay nada que puntuar. Para el resto:");
         text.AppendLine();
         text.AppendLine("El título del catálogo se busca en la Wikipedia catalana; si no aparece, el título original se busca en la inglesa y luego en la española. Se puntúa cada uno de los tres primeros artículos candidatos y gana el que más suma:");
         text.AppendLine();

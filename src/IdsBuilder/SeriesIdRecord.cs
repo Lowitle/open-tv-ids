@@ -161,6 +161,12 @@ internal sealed class SeriesMatchInfo
     internal const string IdentifierMethod = "wikidata-id";
 
     /// <summary>
+    /// Method of the records a person confirmed, completed or dismissed by hand in
+    /// <c>overrides/&lt;emitter&gt;.json</c> (<c>manual</c>).
+    /// </summary>
+    internal const string ManualMethod = "manual";
+
+    /// <summary>
     /// Gets or sets the method (<c>wikidata</c> when a search found the article, <c>wikidata-id</c> when
     /// Wikidata states the identifier of the page, <c>manual</c> when a person corrected the record).
     /// </summary>
