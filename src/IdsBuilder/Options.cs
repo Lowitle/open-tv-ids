@@ -122,8 +122,8 @@ internal sealed class Options
     /// </summary>
     /// <remarks>
     /// It defaults to the temporary folder of the user instead of the working copy because the cache is
-    /// thousands of small files and the working copy is often a network drive, where listing them costs
-    /// more than asking Wikipedia («Z:\» here: forty seconds for three thousand files).
+    /// thousands of small files and a working copy on a network drive spends more time listing them than
+    /// asking Wikipedia (forty seconds for three thousand files, measured on a NAS).
     /// </remarks>
     public string CacheDir { get; set; } = Path.Combine(Path.GetTempPath(), "open-tv-ids");
 }
