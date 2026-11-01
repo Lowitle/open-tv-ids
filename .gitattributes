@@ -1,0 +1,6 @@
+# Los ficheros que genera el volcado se publican tal cual salen de la herramienta: UTF-8 sin BOM y
+# saltos de línea LF, también cuando el repositorio se clona en Windows (donde `core.autocrlf` viene
+# activado por omisión y convertiría los artefactos a CRLF al hacer `checkout`).
+data/**    text eol=lf
+report/**  text eol=lf
+mixnmatch/** text eol=lf
