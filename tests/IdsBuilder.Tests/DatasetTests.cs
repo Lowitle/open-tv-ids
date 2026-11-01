@@ -203,6 +203,39 @@ public class DatasetTests
         }
     }
 
+    [Fact]
+    public void TheRecordOfAnIdentifierOfWikidataSaysSoAndKeepsThePageOfTheProgramme()
+    {
+        // No article: the item comes from the identifier of the page that Wikidata states (P10356), which is
+        // the case of a programme without a Wikipedia article.
+        var record = SeriesIdRecord.Create(
+            "3cat",
+            Program(),
+            article: null,
+            new EntityFacts { Qid = "Q69652877", Imdb = "tt14670820", Tmdb = "123591", Tvdb = "75719" },
+            MatchScorer.FromIdentifier("P10356", "els-barrufets-3d"),
+            Today,
+            SeriesMatchInfo.IdentifierMethod);
+
+        record.Sources.Add("wikidata:P10356:els-barrufets-3d");
+
+        Assert.Equal("wikidata-id", record.Match.Method);
+        Assert.Equal(1, record.Match.Confidence);
+        Assert.Equal("Q69652877", record.Ids["wikidata"]);
+        Assert.Equal("tt14670820", record.Ids["imdb"]);
+        Assert.Equal(
+            new[] { "wikidata:Q69652877", "wikidata:P10356:els-barrufets-3d" },
+            record.Sources);
+
+        var json = JsonSerializer.Serialize(record, DatasetJson.Options);
+
+        Assert.Contains("\"method\":\"wikidata-id\"", json, StringComparison.Ordinal);
+        Assert.Contains(
+            "\"sources\":[\"wikidata:Q69652877\",\"wikidata:P10356:els-barrufets-3d\"]",
+            json,
+            StringComparison.Ordinal);
+    }
+
     private static ProgramEntry Program()
         => new()
         {

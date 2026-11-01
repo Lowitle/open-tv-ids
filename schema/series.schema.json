@@ -10,7 +10,7 @@
     "id": {
       "description": "Global id of the record: the emitter and the id of the work in its catalog.",
       "type": "string",
-      "pattern": "^[a-z][a-z0-9]*:[^:]+$",
+      "pattern": "^[a-z0-9]+:[^:]+$",
       "examples": ["3cat:73476"]
     },
     "emitter": {
@@ -96,13 +96,13 @@
       }
     },
     "sources": {
-      "description": "Where the record comes from, so a consumer can check it.",
+      "description": "Where the record comes from, so a consumer can check it: the item, the article, the identifier of the page of the programme that Wikidata states (<code>wikidata:P10356:els-barrufets-3d</code>), or the fact that a person corrected it.",
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "pattern": "^(wikidata:Q[0-9]{1,12}|wikipedia:[a-z-]{2,12}:.+|manual)$"
+        "pattern": "^(wikidata:Q[0-9]{1,12}|wikidata:P[0-9]{1,5}:.+|wikipedia:[a-z-]{2,12}:.+|manual)$"
       }
     },
     "match": {
@@ -112,12 +112,12 @@
       "required": ["method", "confidence", "verified"],
       "properties": {
         "method": {
-          "description": "wikidata when the matcher found it, manual when a person corrected it in overrides/<emitter>.json.",
+          "description": "wikidata when a search found the article, wikidata-id when Wikidata already states the identifier of the page of the programme (P10356), manual when a person corrected it in overrides/<emitter>.json.",
           "type": "string",
-          "enum": ["wikidata", "manual"]
+          "enum": ["wikidata", "wikidata-id", "manual"]
         },
         "confidence": {
-          "description": "Confidence of the match, from 0 to 1. The dataset publishes from 0.90.",
+          "description": "Confidence of the match, from 0 to 1. The dataset publishes from 0.90; only a manual correction and the identifier of the page reach 1.",
           "type": "number",
           "minimum": 0,
           "maximum": 1

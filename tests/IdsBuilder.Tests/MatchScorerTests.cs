@@ -158,6 +158,19 @@ public class MatchScorerTests
         Assert.Contains("año 2006", verdict.Evidence, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void AnIdentifierOfWikidataNeedsNoTitleAndPublishesWithFullConfidence()
+    {
+        // «Els barrufets 3D» and «Els barrufets» are two series with the same title: the identifier of the page
+        // in Wikidata (P10356) is the only evidence that tells them apart, and it is not a guess.
+        var verdict = MatchScorer.FromIdentifier("P10356", "els-barrufets-3d");
+
+        Assert.Equal(MatchState.Accepted, verdict.State);
+        Assert.Equal(1, verdict.Confidence);
+        Assert.Contains("P10356", verdict.Evidence, StringComparison.Ordinal);
+        Assert.Contains("els-barrufets-3d", verdict.Evidence, StringComparison.Ordinal);
+    }
+
     private static ProgramEntry Program(string title, string category, string? availableSince, string? originalTitle)
         => new()
         {

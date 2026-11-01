@@ -33,8 +33,13 @@ Opcionales, pero son las que hacen que el emparejamiento funcione:
 | `detail_countries` | Países de origen publicados por la ficha. Se usa como pista. |
 | `primera_emissio` | Fecha (`AAAA-MM-DD`) del vídeo más antiguo disponible. Ojo: es la fecha del catálogo, no la del estreno. |
 | `url` | Página del programa en el catálogo del emisor (`https://www.3cat.cat/3cat/polonia/`). Es el enlace que abre quien revisa a mano para comprobar que los identificadores son de la obra. |
+| `slug` | Identificador de la página (`els-barrufets-3d`): el valor que Wikidata declara en `P10356` («TV3 show ID»). Si falta, se lee del final de `url`, así que un volcado sin esta columna también funciona. |
 
 Cualquier otra columna se ignora, así que un volcado puede llevar más información sin romper nada.
+
+`slug` y `url` no son decorativos: antes de buscar ningún título, el build lee de Wikidata todos los valores de
+`P10356` y casa los programas cuyo slug está ahí. Un volcado que no publique ninguno de los dos sigue
+funcionando, pero deja ese camino sin usar.
 
 ## El volcado de 3Cat
 

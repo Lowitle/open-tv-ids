@@ -67,6 +67,10 @@ internal sealed class SeriesIdRecord
     /// <param name="facts">The item of the article, or <c>null</c> when it could not be read.</param>
     /// <param name="verdict">The verdict of the scorer.</param>
     /// <param name="today">Day the dataset is built.</param>
+    /// <param name="method">
+    /// How the record was matched (<c>wikidata</c> when a search found the article, <c>wikidata-id</c> when
+    /// Wikidata already states the identifier of the page of the programme).
+    /// </param>
     /// <returns>The record.</returns>
     internal static SeriesIdRecord Create(
         string emitter,
@@ -74,7 +78,8 @@ internal sealed class SeriesIdRecord
         ArticleMatch? article,
         EntityFacts? facts,
         MatchVerdict verdict,
-        DateOnly today)
+        DateOnly today,
+        string method = "wikidata")
     {
         var originalTitle = program.OriginalTitle;
         var record = new SeriesIdRecord
@@ -87,7 +92,7 @@ internal sealed class SeriesIdRecord
             Title = program.Title,
             OriginalTitle = string.Equals(originalTitle, program.Title, StringComparison.Ordinal) ? null : originalTitle,
             AvailableSince = ReadDate(program.AvailableSince),
-            Match = new SeriesMatchInfo { Method = "wikidata", Confidence = verdict.Confidence },
+            Match = new SeriesMatchInfo { Method = method, Confidence = verdict.Confidence },
             FirstSeen = today,
             LastSeen = today
         };
@@ -149,7 +154,16 @@ internal sealed class SeriesIdRecord
 /// </summary>
 internal sealed class SeriesMatchInfo
 {
-    /// <summary>Gets or sets the method (<c>wikidata</c>, <c>manual</c>).</summary>
+    /// <summary>
+    /// Method of the records whose item Wikidata already states with the identifier of the page of the
+    /// programme, which needs no search by title (<c>wikidata-id</c>).
+    /// </summary>
+    internal const string IdentifierMethod = "wikidata-id";
+
+    /// <summary>
+    /// Gets or sets the method (<c>wikidata</c> when a search found the article, <c>wikidata-id</c> when
+    /// Wikidata states the identifier of the page, <c>manual</c> when a person corrected the record).
+    /// </summary>
     public string Method { get; set; } = "wikidata";
 
     /// <summary>Gets or sets the confidence, from 0 to 1.</summary>

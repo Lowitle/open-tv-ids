@@ -190,6 +190,80 @@ internal sealed class WikidataClient : IDisposable
             .AppendLine("}")
             .ToString();
 
+    /// <summary>
+    /// Reads every item that states an identifier of an emitter.
+    /// </summary>
+    /// <param name="property">Property of Wikidata the identifier belongs to (<c>P10356</c>).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>
+    /// The item of each value, keyed by the value of the property; <c>null</c> when the request failed, which
+    /// is what tells the caller not to lose the answer it already had.
+    /// </returns>
+    /// <remarks>
+    /// One request for the whole of Wikidata instead of one per programme: the map is small (a few hundred
+    /// statements) and it is what lets the builder skip the search of the programmes Wikidata already links.
+    /// </remarks>
+    internal async Task<Dictionary<string, string>?> GetIdentifiersAsync(
+        string property,
+        CancellationToken cancellationToken)
+    {
+        var url = "https://query.wikidata.org/sparql?format=json&query=" + Uri.EscapeDataString(IdentifiersQuery(property));
+        var answer = await SendAsync<SparqlAnswer>(url, cancellationToken).ConfigureAwait(false);
+        if (answer is null)
+        {
+            return null;
+        }
+
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var row in answer.Results?.Bindings ?? [])
+        {
+            var value = Text(row, "id");
+            var qid = Item(row);
+
+            if (value is null || qid is null)
+            {
+                continue;
+            }
+
+            if (!map.TryAdd(value, qid))
+            {
+                _log?.Invoke($"«{value}» es el valor de {property} en dos elementos: se usa {map[value]}.");
+            }
+        }
+
+        return map;
+    }
+
+    /// <summary>
+    /// Builds the SPARQL query of the identifiers of an emitter.
+    /// </summary>
+    /// <param name="property">Property of Wikidata the identifier belongs to (<c>P10356</c>).</param>
+    /// <returns>The query.</returns>
+    /// <exception cref="ArgumentException">The property is not one of Wikidata.</exception>
+    /// <remarks>
+    /// The property arrives from the descriptor of an emitter, not from the command line, but the query is
+    /// built by joining strings: a value that is not a property would be a query and not an identifier.
+    /// </remarks>
+    internal static string IdentifiersQuery(string property)
+    {
+        if (property.Length < 2
+            || property[0] != 'P'
+            || !int.TryParse(
+                property.AsSpan(1),
+                System.Globalization.NumberStyles.None,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out _))
+        {
+            throw new ArgumentException($"«{property}» no es una propiedad de Wikidata.", nameof(property));
+        }
+
+        return new StringBuilder("SELECT ?item ?id WHERE { ?item wdt:")
+            .Append(property)
+            .AppendLine(" ?id }")
+            .ToString();
+    }
+
     private static string? Item(Dictionary<string, SparqlValue> row)
     {
         var value = Text(row, "item");

@@ -18,7 +18,10 @@ internal enum MatchState
 /// <summary>
 /// The verdict of the matcher for a programme: what it decided and why.
 /// </summary>
-/// <param name="Confidence">Confidence in the match, from 0 to 0,99 (1 is reserved for a manual check).</param>
+/// <param name="Confidence">
+/// Confidence in the match, from 0 to 0,99 for a title search: 1 is reserved for what a person confirms and
+/// for the identifier Wikidata already states, which is not a guess.
+/// </param>
 /// <param name="State">What the builder does with the programme.</param>
 /// <param name="Evidence">The pieces of evidence the confidence is built from, for the review file.</param>
 internal sealed record MatchVerdict(double Confidence, MatchState State, string Evidence);
@@ -45,6 +48,11 @@ internal sealed record MatchVerdict(double Confidence, MatchState State, string 
 /// available on 3Cat, not the date the work premiered («Bola de Drac Súper» is filed under 2025 and the
 /// series is from 2015), so it can only confirm a match, never discard it.
 /// </para>
+/// <para>
+/// A programme whose page Wikidata already links to an item with the identifier of the emitter is not scored
+/// at all: see <see cref="FromIdentifier"/>. There is no title to compare, and the statement is worth more
+/// than every piece of evidence a search can add up.
+/// </para>
 /// </remarks>
 internal static class MatchScorer
 {
@@ -53,6 +61,22 @@ internal static class MatchScorer
 
     /// <summary>Confidence from which a record is worth a manual check.</summary>
     internal const double DefaultReview = 0.70;
+
+    /// <summary>
+    /// The verdict of a programme whose page Wikidata already links to an item with the identifier of the
+    /// emitter.
+    /// </summary>
+    /// <param name="property">Property that states the identifier (<c>P10356</c>).</param>
+    /// <param name="value">Value of the property for the programme (<c>els-barrufets-3d</c>).</param>
+    /// <returns>The verdict: published, with the confidence of a statement of Wikidata.</returns>
+    /// <remarks>
+    /// A person compared the page of the emitter with the item and wrote the identifier in Wikidata, so this
+    /// is not a guess and there is nothing to weigh: the statement is the identifier of the work, exactly the
+    /// one a title search tries to find. It is also the only evidence that reaches 1, and the reason the score
+    /// of a search stops at 0,99.
+    /// </remarks>
+    internal static MatchVerdict FromIdentifier(string property, string value)
+        => new(1, MatchState.Accepted, $"{property} «{value}»");
 
     /// <summary>
     /// Evaluates the evidence of a programme.

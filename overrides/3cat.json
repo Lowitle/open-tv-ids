@@ -1,2 +1,12 @@
 [
+  {
+    "id": "3cat:123415012",
+    "ids": {
+      "wikidata": "Q75571842",
+      "imdb": "tt0111920"
+    },
+    "note": "revisado a mano, comprobado en la ficha",
+    "verified": true,
+    "reject": false
+  }
 ]

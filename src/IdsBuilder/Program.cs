@@ -112,6 +112,11 @@ internal static class Program
         Console.WriteLine($"Hecho en {(int)result.Elapsed.TotalMinutes}:{result.Elapsed.Seconds:00}.");
         Console.WriteLine($"   {published} de {total} programas publicados ({Percent(published, total)}), "
             + $"{review} en revisión, {total - published - review} sin coincidencia.");
+
+        if (result.Linked > 0)
+        {
+            Console.WriteLine($"   {result.Linked} de ellos salen del identificador de su ficha en Wikidata, sin buscar por título.");
+        }
         Console.WriteLine($"   {Path.GetFullPath(options.DatasetPath)}");
         Console.WriteLine($"   {Path.GetFullPath(options.ReviewPath)}");
         Console.WriteLine($"   {Path.GetFullPath(options.ReportPath)}");

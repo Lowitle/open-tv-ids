@@ -47,6 +47,17 @@ internal sealed record ProgramEntry
     /// </summary>
     public string? Url { get; init; }
 
+    /// <summary>
+    /// Gets the slug of the page, when the dump publishes it (<c>els-barrufets-3d</c>), which is the value
+    /// Wikidata states as the identifier of the programme in <c>P10356</c>.
+    /// </summary>
+    /// <remarks>
+    /// The dump publishes the column <c>slug</c> and the same value at the end of <c>url</c>; the build uses
+    /// the column when it is there and reads the address otherwise, so a dump without the column still
+    /// works.
+    /// </remarks>
+    public string? Slug { get; init; }
+
     /// <summary>Gets a value indicating whether the programme is a television programme.</summary>
     public bool IsTelevision { get; init; }
 

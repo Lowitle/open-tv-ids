@@ -50,25 +50,32 @@ internal sealed record Outcome(
 /// <param name="Records">The records of the dataset, sorted by id.</param>
 /// <param name="Duplicates">Items that more than one record publishes, which is a sign of a wrong match.</param>
 /// <param name="Elapsed">How long the build took.</param>
+/// <param name="Linked">
+/// Programmes whose item Wikidata already states with the identifier of the page, which are not searched by
+/// title.
+/// </param>
 internal sealed record BuildResult(
     IReadOnlyList<Outcome> Outcomes,
     IReadOnlyList<SeriesIdRecord> Records,
     IReadOnlyList<string> Duplicates,
-    TimeSpan Elapsed);
+    TimeSpan Elapsed,
+    int Linked = 0);
 
 /// <summary>
 /// Matches the programmes of an emitter with Wikidata and writes the dataset.
 /// </summary>
 /// <remarks>
 /// <para>
-/// The build has four steps. The first one looks every programme up in a Wikipedia, which answers with the
-/// article and the Wikidata item of the work in a single request. The second one reads the identifiers of
-/// the items fifty at a time. The third one scores every programme and decides what to publish, to review
-/// or to leave unmatched. The fourth one writes the dataset, the review file and the coverage report.
+/// The build has four steps. The first one reads the identifiers Wikidata already states for the pages of the
+/// emitter, which resolves a programme without looking at its title. The second one looks the rest up in a
+/// Wikipedia, which answers with the article and the Wikidata item of the work in a single request. The third
+/// one reads the identifiers of the items fifty at a time. The fourth one scores every programme and writes
+/// the dataset, the review file and the coverage report.
 /// </para>
 /// <para>
-/// The first and the second steps are the only ones that reach the network, and both go through the cache,
-/// so a second build after a change of the catalog only asks for the programmes whose title changed.
+/// The steps that reach the network go through the cache, so a second build after a change of the catalog
+/// only asks for the programmes whose title changed, and the map of identifiers is one request for the whole
+/// of Wikidata.
 /// </para>
 /// </remarks>
 internal sealed class Builder
@@ -138,10 +145,70 @@ internal sealed class Builder
 
         _progress($"{_catalog.Emitter}: {programs.Count} programas para casar con Wikidata.");
 
-        var resolutions = await ResolveAllAsync(programs, cancellationToken).ConfigureAwait(false);
-        var facts = await ReadFactsAsync(resolutions.Values, cancellationToken).ConfigureAwait(false);
+        // Los programas que Wikidata ya enlaza no se buscan: el identificador de la ficha es la evidencia, y
+        // es lo único que alcanza a los que no tienen artículo.
+        var link = ShowIds.LinkOf(_options.Emitter);
+        var linked = link is null
+            ? new Dictionary<string, ShowIdMatch>(StringComparer.Ordinal)
+            : await LinkedAsync(programs, link, cancellationToken).ConfigureAwait(false);
 
-        return Score(programs, resolutions, facts, started.Elapsed);
+        var resolutions = await ResolveAllAsync(
+                programs.Where(program => !linked.ContainsKey(program.Id)).ToList(),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        var facts = await ReadFactsAsync(
+                resolutions.Values,
+                linked.Values.Select(match => match.Qid),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return Score(programs, resolutions, linked, facts, started.Elapsed);
+    }
+
+    /// <summary>
+    /// Finds the programmes whose page Wikidata already links to an item with the identifier of the emitter.
+    /// </summary>
+    /// <param name="programs">The programmes of the catalog.</param>
+    /// <param name="link">The property that states the identifier, and how its value is read.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The match of each programme, keyed by the id of the programme; empty when there is none.</returns>
+    /// <remarks>
+    /// It is the cheapest half of the build: one request for the whole of Wikidata instead of a search per
+    /// programme, and the only one that reaches the programmes without an article, because the item does not
+    /// have to share a title with the catalog.
+    /// </remarks>
+    private async Task<Dictionary<string, ShowIdMatch>> LinkedAsync(
+        IReadOnlyList<ProgramEntry> programs,
+        ShowIdLink link,
+        CancellationToken cancellationToken)
+    {
+        var matches = new Dictionary<string, ShowIdMatch>(StringComparer.Ordinal);
+        var map = await ShowIds
+            .ReadAsync(link.Property, _wikidata, _cache, _log, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (map.Count == 0)
+        {
+            return matches;
+        }
+
+        foreach (var program in programs)
+        {
+            if (link.ValueOf(program) is not { } value || !map.TryGetValue(value, out var qid))
+            {
+                continue;
+            }
+
+            matches[program.Id] = new ShowIdMatch(link.Property, value, qid);
+        }
+
+        if (matches.Count > 0)
+        {
+            _progress($"   {matches.Count} programas ya enlazados por «{link.Property}» en Wikidata, sin buscar por título.");
+        }
+
+        return matches;
     }
 
     /// <summary>
@@ -259,10 +326,15 @@ internal sealed class Builder
     }
 
     /// <summary>
-    /// Reads the identifiers of the items that the searches found, through the cache.
+    /// Reads the identifiers of the items that the searches found and of the ones Wikidata states, through
+    /// the cache.
     /// </summary>
+    /// <param name="resolutions">What the lookup decided about each programme.</param>
+    /// <param name="linked">Items the identifiers of the emitter point to, which no search had to find.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     private async Task<Dictionary<string, EntityFacts>> ReadFactsAsync(
         IEnumerable<Resolution> resolutions,
+        IEnumerable<string> linked,
         CancellationToken cancellationToken)
     {
         var facts = new Dictionary<string, EntityFacts>(StringComparer.Ordinal);
@@ -270,6 +342,7 @@ internal sealed class Builder
 
         foreach (var qid in resolutions
             .SelectMany(resolution => resolution.Candidates.Select(candidate => candidate.Hit.Qid))
+            .Concat(linked)
             .Distinct(StringComparer.Ordinal))
         {
             if (_cache.TryGet("entities", qid, out EntityFacts? cached) && cached is not null)
@@ -306,12 +379,14 @@ internal sealed class Builder
     /// </summary>
     /// <param name="programs">The programmes of the catalog.</param>
     /// <param name="resolutions">What the lookup decided about each one.</param>
-    /// <param name="facts">The items of the articles.</param>
+    /// <param name="linked">The item Wikidata states for the programmes it already links.</param>
+    /// <param name="facts">The items of the articles and of the identifiers.</param>
     /// <param name="elapsed">Time spent so far.</param>
     /// <returns>The result of the build.</returns>
     private BuildResult Score(
         IReadOnlyList<ProgramEntry> programs,
         Dictionary<string, Resolution> resolutions,
+        Dictionary<string, ShowIdMatch> linked,
         Dictionary<string, EntityFacts> facts,
         TimeSpan elapsed)
     {
@@ -322,35 +397,22 @@ internal sealed class Builder
 
         foreach (var program in programs)
         {
-            var resolution = resolutions[program.Id];
-            var scored = resolution.Candidates
-                .Select(candidate =>
-                {
-                    var candidateFacts = facts.GetValueOrDefault(candidate.Hit.Qid);
-
-                    return new Scored(
-                        candidate,
-                        candidateFacts,
-                        MatchScorer.Evaluate(program, candidate, candidateFacts, _options.Accept, _options.Review));
-                })
-                .OrderByDescending(candidate => candidate.Verdict.Confidence)
-                .ThenByDescending(candidate => candidate.Facts?.HasAnyId ?? false)
-                .ThenBy(candidate => candidate.Article.Hit.Index)
-                .FirstOrDefault();
-
-            var article = scored?.Article;
-            var item = scored?.Facts;
-            var verdict = scored?.Verdict ?? MatchScorer.Evaluate(program, null, null, _options.Accept, _options.Review);
             var manual = _overrides.GetValueOrDefault($"{_options.Emitter}:{program.Id}");
+            var (outcome, record) = Judge(
+                program,
+                resolutions.GetValueOrDefault(program.Id),
+                linked.GetValueOrDefault(program.Id),
+                facts,
+                manual,
+                today);
 
-            outcomes.Add(new Outcome(program, article, resolution.Suggestion, resolution.SuggestionMatch, item, verdict, manual));
+            outcomes.Add(outcome);
 
-            if (verdict.State != MatchState.Accepted && manual is null)
+            if (record is null || (outcome.Verdict.State != MatchState.Accepted && manual is null))
             {
                 continue;
             }
 
-            var record = SeriesIdRecord.Create(_options.Emitter, program, article, item, verdict, today);
             if (manual is not null)
             {
                 Overrides.Apply(record, manual);
@@ -370,7 +432,75 @@ internal sealed class Builder
             records.Add(record);
         }
 
-        return new BuildResult(outcomes, Sorted(records), Duplicates(records), elapsed);
+        return new BuildResult(outcomes, Sorted(records), Duplicates(records), elapsed, linked.Count);
+    }
+
+    /// <summary>
+    /// Decides a programme and builds its record, which is what the dataset and the review file both quote.
+    /// </summary>
+    /// <param name="program">The programme.</param>
+    /// <param name="resolution">What the lookup decided, or <c>null</c> when Wikidata already linked it.</param>
+    /// <param name="linked">The item Wikidata states for the programme, or <c>null</c>.</param>
+    /// <param name="facts">The items of the articles and of the identifiers.</param>
+    /// <param name="manual">The override of the review file, when a person wrote one.</param>
+    /// <param name="today">Day of the build.</param>
+    /// <returns>The outcome and, when the programme can be published, its record.</returns>
+    private (Outcome Outcome, SeriesIdRecord? Record) Judge(
+        ProgramEntry program,
+        Resolution? resolution,
+        ShowIdMatch? linked,
+        Dictionary<string, EntityFacts> facts,
+        ManualOverride? manual,
+        DateOnly today)
+    {
+        if (linked is not null)
+        {
+            // Wikidata declara el identificador de la ficha: no hay nada que puntuar, y el elemento vale
+            // aunque sus datos no se hayan podido leer en este volcado (la próxima pasada los leerá).
+            var linkedFacts = facts.GetValueOrDefault(linked.Qid) ?? new EntityFacts { Qid = linked.Qid };
+            var linkedVerdict = MatchScorer.FromIdentifier(linked.Property, linked.Value);
+            var linkedRecord = SeriesIdRecord.Create(
+                _options.Emitter,
+                program,
+                null,
+                linkedFacts,
+                linkedVerdict,
+                today,
+                SeriesMatchInfo.IdentifierMethod);
+
+            linkedRecord.Sources.Add($"wikidata:{linked.Property}:{linked.Value}");
+
+            return (new Outcome(program, null, null, TitleMatch.None, linkedFacts, linkedVerdict, manual), linkedRecord);
+        }
+
+        var scored = resolution?.Candidates
+            .Select(candidate =>
+            {
+                var candidateFacts = facts.GetValueOrDefault(candidate.Hit.Qid);
+
+                return new Scored(
+                    candidate,
+                    candidateFacts,
+                    MatchScorer.Evaluate(program, candidate, candidateFacts, _options.Accept, _options.Review));
+            })
+            .OrderByDescending(candidate => candidate.Verdict.Confidence)
+            .ThenByDescending(candidate => candidate.Facts?.HasAnyId ?? false)
+            .ThenBy(candidate => candidate.Article.Hit.Index)
+            .FirstOrDefault();
+
+        var article = scored?.Article;
+        var item = scored?.Facts;
+        var verdict = scored?.Verdict ?? MatchScorer.Evaluate(program, null, null, _options.Accept, _options.Review);
+        var outcome = new Outcome(
+            program,
+            article,
+            resolution?.Suggestion,
+            resolution?.SuggestionMatch ?? TitleMatch.None,
+            item,
+            verdict,
+            manual);
+
+        return (outcome, SeriesIdRecord.Create(_options.Emitter, program, article, item, verdict, today));
     }
 
     private static List<SeriesIdRecord> Sorted(List<SeriesIdRecord> records)

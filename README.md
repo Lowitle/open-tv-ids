@@ -8,8 +8,12 @@ línea JSON por programa con los identificadores del mismo trabajo en **Wikidata
 **TVDB**:
 
 ```json
-{"id":"3cat:73476","emitter":"3cat","emitterId":"73476","kind":"anime","category":"Anime","title":"Bola de Drac Súper","originalTitle":"Dragon Ball Super","availableSince":"2025-06-06","ids":{"wikidata":"Q19839121","imdb":"tt4644488","tmdb":"62715","tvdb":"295068"},"sources":["wikidata:Q19839121","wikipedia:ca:Bola de Drac Súper"],"match":{"method":"wikidata","confidence":0.9,"verified":false},"firstSeen":"2026-10-30","lastSeen":"2026-10-31"}
+{"id":"3cat:73476","emitter":"3cat","emitterId":"73476","kind":"anime","category":"Anime","title":"Bola de Drac Súper","originalTitle":"Dragon Ball Super","availableSince":"2025-06-06","ids":{"wikidata":"Q19839121","imdb":"tt4644488","tmdb":"62715","tvdb":"295068"},"sources":["wikidata:Q19839121","wikipedia:ca:Bola de Drac Súper"],"match":{"method":"wikidata","confidence":0.9,"verified":false},"firstSeen":"2026-10-30","lastSeen":"2026-11-01"}
+{"id":"3cat:74796","emitter":"3cat","emitterId":"74796","kind":"series","category":"Sèrie","title":"Els barrufets 3D","originalTitle":"The smurfs","availableSince":"2025-12-21","ids":{"wikidata":"Q69652877","imdb":"tt14670820","tmdb":"123591","tvdb":"392426"},"sources":["wikidata:Q69652877","wikidata:P10356:els-barrufets-3d"],"match":{"method":"wikidata-id","confidence":1,"verified":false},"firstSeen":"2026-10-30","lastSeen":"2026-11-01"}
 ```
+
+El segundo no tiene artículo: Wikidata ya declara el identificador de su ficha (`P10356`), así que el elemento
+sale de ahí y no se busca ningún título.
 
 El catálogo de 3Cat identifica cada programa con un `programatv_id` que no significa nada fuera de 3Cat.
 Los agregadores de metadata de Jellyfin (TheMovieDb, TheTVDB, OMDb) trabajan con sus propios ids, y
@@ -96,11 +100,17 @@ tendría el mismo contrato.
 
 ## Cómo se empareja
 
-1. Se busca el título del programa (y el original, si el catálogo lo publica) en las Wikipedias catalana,
+1. Antes de buscar nada, se lee el **identificador de la ficha que Wikidata ya declara**: la propiedad
+   `P10356` («TV3 show ID»), en un solo SPARQL para todo Wikidata. Su valor es el *slug* de la página
+   (`https://www.3cat.cat/3cat/els-barrufets-3d/` → `els-barrufets-3d`), así que el programa cuyo slug está
+   ahí ya tiene elemento y no hay nada que puntuar: se publica con `"method": "wikidata-id"` y confianza 1.
+   Es la única vía para las obras **sin artículo** en ninguna Wikipedia, y hoy resuelve 344 de las 1.349
+   fichas (207 de ellas no las encontraba el título).
+2. Se busca el título del resto (y el original, si el catálogo lo publica) en las Wikipedias catalana,
    española e inglesa. El artículo devuelve el elemento de Wikidata en la misma respuesta.
-2. Se leen los identificadores de los elementos cincuenta a la vez: IMDb (`P345`), TMDB (`P4983`/`P4947`)
+3. Se leen los identificadores de los elementos cincuenta a la vez: IMDb (`P345`), TMDB (`P4983`/`P4947`)
    y TVDB (`P4835`).
-3. Se puntúa cada candidato:
+4. Se puntúa cada candidato:
 
 | Evidencia | Puntos |
 | --- | ---: |
@@ -113,9 +123,14 @@ tendría el mismo contrato.
 | El elemento es una serie de televisión o un subtipo suyo (`P31/P279*` de Q5398426) | +0,10 |
 | El año de inicio (`P580`) coincide con el del catálogo (±1) | +0,10 |
 
-4. Se queda el candidato con más puntos. Desde **0,90** el registro se publica; entre **0,70 y 0,89** queda
+5. Se queda el candidato con más puntos. Desde **0,90** el registro se publica; entre **0,70 y 0,89** queda
    en `report/<emisor>/revision.csv` para que lo mire una persona; por debajo aparece también en el CSV, con
    estado `sin_match`.
+
+Una búsqueda no pasa nunca de 0,99: solo el identificador de la ficha y una corrección a mano llegan a 1. Y el
+identificador no es un atajo, es la evidencia más fuerte que hay: los dos emparejamientos que corrigió en el
+primer volcado llevaban el mismo título que el bueno («Els barrufets 3D» apuntaba a la serie de 1981 y es la
+de 2021; «Les Tortugues Ninja» apuntaba a la de 1987 y es la de 2012, la de los 124 capítulos).
 
 Un año que no coincide **no resta**: la fecha del catálogo es la de alta en la plataforma, no la del
 estreno («Bola de Drac Súper» figura en 2025 y la serie es de 2015), así que solo puede confirmar un
@@ -138,7 +153,7 @@ artículo que encontró y **los enlaces para comprobarlo de un vistazo**: la fic
 el elemento de Wikidata, el artículo de la Wikipedia y, si lo tiene, la ficha de IMDb.
 
 ```
-[3/93] 3cat:61340 · Sèrie · revisar · confianza 0,85 · título exacto
+[3/61] 3cat:61340 · Sèrie · revisar · confianza 0,85 · título exacto
    Título:   Polònia
    Artículo: ca:Polònia (Exact) · Q4887621
    Ids:      wikidata Q4887621 · imdb tt0891508
@@ -159,7 +174,7 @@ el elemento de Wikidata, el artículo de la Wikipedia y, si lo tiene, la ficha d
 
 **Cada respuesta se guarda al momento** en `overrides/<emisor>.json`, así que la revisión se puede dejar a
 medias y retomar otro día: los programas ya decididos se saltan solos. Con `--all` entra también en los
-1.003 programas sin coincidencia (la segunda pasada, para las obras que existen pero que el matcher no
+828 programas sin coincidencia (la segunda pasada, para las obras que existen pero que el matcher no
 encontró) y con `--again` vuelve a los que ya tienen corrección.
 
 Al terminar, se aplica al dataset sin tocar la red:
@@ -239,31 +254,36 @@ proveedores nativos:
 
 ## Cobertura del último volcado (3cat)
 
-1.349 programas de televisión procesados: **253 publicados** (18,8 %), 93 esperando revisión y 1.003 sin
-coincidencia. De los publicados, 246 llevan IMDb, 236 TMDB y 226 TVDB; los 253 llevan Wikidata.
+1.349 programas de televisión procesados: **460 publicados** (34,1 %), 61 esperando revisión y 828 sin
+coincidencia. De los publicados, 385 llevan IMDb, 388 TMDB y 329 TVDB; los 460 llevan Wikidata. **344 salen
+del identificador de la ficha** (`P10356`) y no de una búsqueda por título; 37 publican solo el elemento
+porque su elemento de Wikidata no tiene IMDb, TMDB ni TVDB todavía (están listados en
+[`report/3cat/cobertura.md`](report/3cat/cobertura.md): añadirlos en Wikidata los completa).
 
 | Categoría | Procesados | Publicados | Con TMDB |
 | --- | ---: | ---: | ---: |
-| Sèrie | 245 | 122 (49,8 %) | 130 |
-| Animació | 146 | 64 (43,8 %) | 75 |
-| Anime | 29 | 9 (31,0 %) | 15 |
-| Humor | 27 | 5 (18,5 %) | 6 |
-| Concurs | 53 | 7 (13,2 %) | 11 |
-| Magazín | 38 | 5 (13,2 %) | 6 |
-| Documental | 244 | 17 (7,0 %) | 29 |
-| Actualitat | 186 | 6 (3,2 %) | 14 |
+| Sèrie | 245 | 178 (72,7 %) | 167 |
+| Anime | 29 | 18 (62,1 %) | 21 |
+| Animació | 146 | 80 (54,8 %) | 80 |
+| Humor | 27 | 9 (33,3 %) | 8 |
+| Concurs | 53 | 17 (32,1 %) | 20 |
+| Documental | 244 | 72 (29,5 %) | 66 |
+| Magazín | 38 | 9 (23,7 %) | 7 |
+| Actualitat | 186 | 36 (19,4 %) | 25 |
+| (sin categoría) | 267 | 31 (11,6 %) | 35 |
+| Esports | 34 | 2 (5,9 %) | 1 |
 
-La ficción es donde el cruce funciona: la mitad de las series y el 44 % de la animación tienen artículo en
-alguna Wikipedia. Los programas propios de la plataforma (documentales, informativos, deportes, magacines)
-casi nunca lo tienen, y ahí el dataset no puede llegar sin trabajo manual. Programa a programa, con la
-evidencia y la sugerencia de cada uno, está en [`report/3cat/cobertura.md`](report/3cat/cobertura.md) y
+La ficción es donde el cruce funciona: casi tres cuartas partes de las series y más de la mitad de la
+animación ya tienen ficha. Los programas propios de la plataforma (documentales, informativos, deportes,
+magacines) siguen lejos, porque ni tienen artículo ni están dados de alta en Wikidata. Programa a programa,
+con la evidencia y la sugerencia de cada uno, está en [`report/3cat/cobertura.md`](report/3cat/cobertura.md) y
 [`report/3cat/revision.csv`](report/3cat/revision.csv).
 
 ## Límites
 
-- **No es exhaustivo.** Un programa sin artículo en ninguna de las tres Wikipedias no se puede casar. Las
-  franquicias con artículo propio (la de «Bola de Drac», la del manga de «Naruto») se quedan fuera porque no
-  publican ids de serie.
+- **No es exhaustivo.** Un programa sin artículo en ninguna de las tres Wikipedias **ni** identificador de su
+  ficha en Wikidata no se puede casar. Las franquicias con artículo propio (la de «Bola de Drac», la del manga
+  de «Naruto») se quedan fuera porque no publican ids de serie.
 - **Los registros salen con `"verified": false`** porque la única fuente es Wikidata. Una segunda fuente
   independiente (TMDB `/find`, TVmaze `/lookup/shows?imdb=`) es lo que los marcará como verificados.
 - **Cortesía con los endpoints.** `IdsBuilder` se presenta con un `User-Agent` identificable y deja una
@@ -277,8 +297,12 @@ guarda el título del artículo citado en `sources`.
 
 ## Hoja de ruta
 
-- [ ] Revisar `report/3cat/revision.csv` con `--check` y pasar a `overrides/3cat.json` los 93 programas que
-      quedan a medias.
+- [x] Leer el identificador de la ficha que Wikidata ya declara (`P10356`): 207 registros que el título no
+      encontraba y dos emparejamientos corregidos.
+- [ ] Revisar con `--check` los 61 programas que quedan a medias y pasarlos a `overrides/3cat.json`.
+- [ ] Llevar el catálogo a **Mix'n'match** (`mixnmatch/3cat.tsv`, con `P10356` y los candidatos en `autoq`)
+      para que la comunidad confirme en abierto lo que el matcher no tiene claro, rellene `P10356` en Wikidata
+      y el siguiente volcado lo lea sin trabajo manual.
 - [ ] Verificar con una segunda fuente (TMDB `/find`, TVmaze) los registros publicados, para poder escribir
       `"verified": true`.
 - [ ] Segundo emisor (**rtve**): confirmar su endpoint público de programas, escribir su volcado y añadirlo

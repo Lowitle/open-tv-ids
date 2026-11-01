@@ -37,6 +37,7 @@ internal static class CoverageReport
         var rejected = outcomes.Count(outcome => outcome.Manual is { Reject: true });
         var review = outcomes.Count(outcome => outcome.Manual is null && outcome.Verdict.State == MatchState.Review);
         var unmatched = outcomes.Count - published - review;
+        var linked = result.Linked;
         var text = new StringBuilder();
 
         text.Append("# Cobertura de identificadores externos · ").Append(options.Emitter).AppendLine();
@@ -44,7 +45,7 @@ internal static class CoverageReport
         text.Append("Generado el ").Append(Day(today))
             .Append(" a partir de `").Append(Path.GetFileName(options.InputPath))
             .Append("` con `IdsBuilder`.").AppendLine();
-        text.AppendLine("Fuente de los identificadores: Wikidata (CC0), leída a través de los artículos de Wikipedia.");
+        text.AppendLine("Fuente de los identificadores: Wikidata (CC0), leída a través de los artículos de Wikipedia y del identificador de la ficha del programa («P10356»).");
         text.AppendLine();
 
         text.AppendLine("## Totales");
@@ -80,6 +81,13 @@ internal static class CoverageReport
         text.AppendLine(".");
         text.AppendLine();
 
+        if (linked > 0)
+        {
+            text.Append(Num(linked))
+                .AppendLine(" programas no se han buscado por título: Wikidata ya declara el identificador de su ficha («P10356»), así que el elemento sale de esa declaración y la ficha del emisor es la comprobación.");
+            text.AppendLine();
+        }
+
         text.AppendLine("## Identificadores publicados");
         text.AppendLine();
         text.AppendLine("| Catálogo | Programas |");
@@ -111,6 +119,39 @@ internal static class CoverageReport
                 .Append(" | ").Append(Num(inGroup.Count(outcome => outcome.Facts is not null
                     && ExternalIds.Tmdb(outcome.Facts.AnyTmdb) is not null)))
                 .AppendLine(" |");
+        }
+
+        text.AppendLine();
+        text.AppendLine("## Solo el elemento de Wikidata");
+        text.AppendLine();
+
+        var onlyItem = result.Records.Where(record => record.Ids.Count == 1).ToList();
+
+        if (onlyItem.Count == 0)
+        {
+            text.AppendLine("Ninguno: todos los registros publican al menos un identificador externo.");
+        }
+        else
+        {
+            text.Append(Num(onlyItem.Count))
+                .AppendLine(" registros publican solo el elemento, porque Wikidata no tiene IMDb (P345), TMDB (P4983/P4947) ni TVDB (P4835) de ese elemento: añadirlos en Wikidata los completa en el siguiente volcado.");
+            text.AppendLine();
+            text.AppendLine("| Id | Programa | Elemento |");
+            text.AppendLine("| --- | --- | --- |");
+
+            foreach (var record in onlyItem.OrderBy(record => record.Title, StringComparer.Ordinal).Take(Sample))
+            {
+                text.Append("| ").Append(record.EmitterId)
+                    .Append(" | ").Append(Cell(record.Title))
+                    .Append(" | ").Append(record.Ids["wikidata"])
+                    .AppendLine(" |");
+            }
+
+            if (onlyItem.Count > Sample)
+            {
+                text.AppendLine();
+                text.Append("…y ").Append(Num(onlyItem.Count - Sample)).AppendLine(" más.");
+            }
         }
 
         text.AppendLine();
@@ -193,6 +234,8 @@ internal static class CoverageReport
 
         text.AppendLine();
         text.AppendLine("## Cómo se decide");
+        text.AppendLine();
+        text.AppendLine("Antes de buscar nada, el build lee el identificador de la ficha que Wikidata ya declara (`P10356`, «TV3 show ID»): si existe, ese elemento es el del programa y no hay nada que puntuar. Para el resto:");
         text.AppendLine();
         text.AppendLine("El título del catálogo se busca en la Wikipedia catalana; si no aparece, el título original se busca en la inglesa y luego en la española. Se puntúa cada uno de los tres primeros artículos candidatos y gana el que más suma:");
         text.AppendLine();
