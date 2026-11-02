@@ -1,6 +1,6 @@
 # Cobertura de identificadores externos · 3cat
 
-Generado el 2026-11-01 a partir de `3cat.csv` con `IdsBuilder`.
+Generado el 2026-11-02 a partir de `3cat.csv` con `IdsBuilder`.
 Fuente de los identificadores: Wikidata (CC0), leída a través de los artículos de Wikipedia y del identificador de la ficha del programa («P10356»).
 
 ## Totales
@@ -8,9 +8,9 @@ Fuente de los identificadores: Wikidata (CC0), leída a través de los artículo
 | Métrica | Programas | Porcentaje |
 | --- | ---: | ---: |
 | Programas procesados | 1.349 | 100,0 % |
-| Publicados en el dataset | 460 | 34,1 % |
-| En revisión | 61 | 4,5 % |
-| Sin coincidencia | 828 | 61,4 % |
+| Publicados en el dataset | 459 | 34,0 % |
+| En revisión | 60 | 4,4 % |
+| Sin coincidencia | 830 | 61,5 % |
 
 Umbrales: se publica desde 0,90 de confianza y se revisa desde 0,70. 1 registro viene de `overrides/3cat.json`.
 
@@ -20,9 +20,9 @@ Umbrales: se publica desde 0,90 de confianza y se revisa desde 0,70. 1 registro 
 
 | Catálogo | Programas |
 | --- | ---: |
-| wikidata | 460 |
-| tmdb | 388 |
-| imdb | 385 |
+| wikidata | 459 |
+| tmdb | 387 |
+| imdb | 384 |
 | tvdb | 329 |
 
 ## Por categoría
@@ -30,13 +30,13 @@ Umbrales: se publica desde 0,90 de confianza y se revisa desde 0,70. 1 registro 
 | Categoría | Procesados | Publicados | En revisión | Sin coincidencia | Con TMDB |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | (sin categoría) | 267 | 31 | 12 | 224 | 35 |
-| Sèrie | 245 | 178 | 7 | 60 | 167 |
+| Sèrie | 245 | 179 | 7 | 59 | 168 |
 | Documental | 244 | 72 | 6 | 166 | 66 |
 | Actualitat | 186 | 36 | 5 | 145 | 25 |
-| Animació | 146 | 80 | 9 | 57 | 80 |
+| Animació | 146 | 79 | 8 | 59 | 79 |
 | Entreteniment | 64 | 8 | 4 | 52 | 11 |
 | Concurs | 53 | 17 | 8 | 28 | 20 |
-| Magazín | 38 | 9 | 3 | 26 | 7 |
+| Magazín | 38 | 8 | 3 | 27 | 6 |
 | Esports | 34 | 2 | 2 | 30 | 1 |
 | Anime | 29 | 18 | 0 | 11 | 21 |
 | Humor | 27 | 9 | 4 | 14 | 8 |
@@ -85,7 +85,6 @@ Los 20 programas con más evidencia que no llegan al umbral:
 | 67116 | Agent Binky: Mascotes de l'univers | 0,80 | título exacto, TMDB+TVDB | Agent Binky: Mascotes de l'univers (ca, Q85740087) |
 | 72336 | Amb l'aigua al coll | 0,80 | título con calificador, calificador «pel·lícula del 1983», TMDB | Amb l'aigua al coll (pel·lícula del 1983) (ca, Q1171640) |
 | 48556 | Barcelona, ciutat neutral | 0,80 | título exacto, IMDb, año 2011 | Barcelona ciutat neutral (ca, Q97156232) |
-| 52276 | Bubble Bip | 0,80 | título exacto, serie de televisión, año 2014 | Bubble Bip (ca, Q21081849) |
 | 71896 | Cal trobar la Sara | 0,80 | título exacto, TMDB | Cal trobar la Sara (ca, Q21091793) |
 | 158769214 | El club | 0,80 | título con calificador, calificador «2015 film», TMDB | The Club (2015 film) (en, Q18959440) |
 | 56016 | El dia de demà | 0,80 | título exacto, TMDB | El dia de demà (ca, Q14320) |
@@ -100,12 +99,13 @@ Los 20 programas con más evidencia que no llegan al umbral:
 | 59136 | Interiors | 0,80 | título exacto, TMDB | Interiors (ca, Q961403) |
 | 46236 | Km 0 | 0,80 | título con calificador, calificador «película», TMDB | Km. 0 (película) (es, Q5234857) |
 | 46336 | L'Endemà | 0,80 | título exacto, TMDB | L'endemà (es, Q19999744) |
+| 179709763 | L'illa del tresor | 0,80 | título con calificador, calificador «pel·lícula de 1934», TMDB | L'illa del tresor (pel·lícula de 1934) (ca, Q2634066) |
 
 Para resolverlos de uno en uno, con los enlaces a la ficha del emisor y al elemento de Wikidata: `dotnet run --project src/IdsBuilder -- --check` (guarda cada decisión en `overrides/3cat.json`).
 
 ## Colaboración (Mix'n'match)
 
-`mixnmatch/3cat.tsv` es el catálogo entero en el formato que importa Mix'n'match: una fila por programa, con el slug de su ficha como `id`, la categoría y el título original en `desc` y el elemento en `q` o `autoq`. 1.349 fichas: 345 ya casadas con certeza, 115 por confirmar y 889 esperando a que alguien las case.
+`mixnmatch/3cat.tsv` es el catálogo entero en el formato que importa Mix'n'match: una fila por programa, con el slug de su ficha como `id`, la categoría y el título original en `desc` y el elemento en `q` o `autoq`. 1.349 fichas: 345 ya casadas con certeza, 114 por confirmar y 890 esperando a que alguien las case.
 
 El identificador de cada fila es el valor de `P10356`, así que el catálogo se importa con esa propiedad: cuando un voluntario casa una fila, Mix'n'match escribe el identificador en el elemento y el siguiente volcado publica el programa, sin buscar el título.
 
@@ -125,8 +125,8 @@ Series, animación y cine que no se han podido casar (primeros 20 por antigüeda
 | 46556 | Ermessenda | — | Ermessenda de Carcassona (ca) |
 | 46659 | La Lua i el món | — | K3 (ca) |
 | 46716 | Megaminimals | Megaminimals | Josep Lluís Viciana i Monfort (ca) |
-| 47176 | Els Extraordinaris | — | Consistori papal (ca) |
-| 47536 | L'illa del far | L'illa del Far | Illes Cíes (ca) |
+| 47176 | Els Extraordinaris | — | — |
+| 47536 | L'illa del far | L'illa del Far | — |
 | 47556 | Lila | Lila | Lila Kedrova (ca) |
 | 48636 | Benvinguts a Patatamón! | — | Canal 3XL (ca) |
 | 48916 | Lara, què fem? | Ask Lara | SX3 (ca) |
@@ -161,5 +161,5 @@ El título del catálogo se busca en la Wikipedia catalana; si no aparece, el t�
 
 Un año que no coincide no resta: la fecha del catálogo es la de alta en 3Cat, no la de estreno.
 
-Tiempo del volcado: 0:16.
+Tiempo del volcado: 1:48.
 
