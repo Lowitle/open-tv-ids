@@ -8,5 +8,204 @@
     "note": "revisado a mano, comprobado en la ficha",
     "verified": true,
     "reject": false
+  },
+  {
+    "id": "3cat:145947628",
+    "ids": {
+      "wikidata": "Q8775156",
+      "imdb": "tt0460659",
+      "tmdb": "60218"
+    },
+    "note": "revisado a mano, comprobado en la ficha",
+    "verified": true,
+    "reject": false
+  },
+  {
+    "id": "3cat:158769214",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
+  },
+  {
+    "id": "3cat:179709763",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
+  },
+  {
+    "id": "3cat:186032543",
+    "ids": {
+      "wikidata": "Q20104327",
+      "imdb": "tt0423710"
+    },
+    "note": "revisado a mano, comprobado en la ficha",
+    "verified": true,
+    "reject": false
+  },
+  {
+    "id": "3cat:201630493",
+    "ids": {
+      "wikidata": "Q11944356",
+      "tmdb": "59054"
+    },
+    "note": "revisado a mano, comprobado en la ficha",
+    "verified": true,
+    "reject": false
+  },
+  {
+    "id": "3cat:38205",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
+  },
+  {
+    "id": "3cat:39605",
+    "ids": {
+      "wikidata": "Q11918695",
+      "imdb": "tt1729018",
+      "tvdb": "311130"
+    },
+    "note": "revisado a mano, comprobado en la ficha",
+    "verified": true,
+    "reject": false
+  },
+  {
+    "id": "3cat:46236",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
+  },
+  {
+    "id": "3cat:46336",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
+  },
+  {
+    "id": "3cat:48556",
+    "ids": {
+      "wikidata": "Q97156232",
+      "imdb": "tt1755047"
+    },
+    "note": "revisado a mano, comprobado en la ficha",
+    "verified": true,
+    "reject": false
+  },
+  {
+    "id": "3cat:51056",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
+  },
+  {
+    "id": "3cat:52156",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
+  },
+  {
+    "id": "3cat:52956",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
+  },
+  {
+    "id": "3cat:55316",
+    "ids": {
+      "wikidata": "Q27986763",
+      "imdb": "tt6427322"
+    },
+    "note": "revisado a mano, comprobado en la ficha",
+    "verified": true,
+    "reject": false
+  },
+  {
+    "id": "3cat:55536",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
+  },
+  {
+    "id": "3cat:55836",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
+  },
+  {
+    "id": "3cat:56016",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
+  },
+  {
+    "id": "3cat:56816",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
+  },
+  {
+    "id": "3cat:58536",
+    "ids": {
+      "wikidata": "Q46839497",
+      "imdb": "tt0424721"
+    },
+    "note": "revisado a mano, comprobado en la ficha",
+    "verified": true,
+    "reject": false
+  },
+  {
+    "id": "3cat:59136",
+    "ids": {},
+    "note": "descartado a mano: el emparejamiento no era la obra",
+    "verified": false,
+    "reject": true
+  },
+  {
+    "id": "3cat:60156",
+    "ids": {
+      "wikidata": "Q101634179",
+      "imdb": "tt12485250",
+      "tmdb": "126821",
+      "tvdb": "380396"
+    },
+    "note": "revisado a mano, comprobado en la ficha",
+    "verified": true,
+    "reject": false
+  },
+  {
+    "id": "3cat:60236",
+    "ids": {
+      "wikidata": "Q60742069",
+      "imdb": "tt8942838",
+      "tmdb": "239517",
+      "tvdb": "353268"
+    },
+    "note": "revisado a mano",
+    "verified": false,
+    "reject": false
+  },
+  {
+    "id": "3cat:61536",
+    "ids": {
+      "wikidata": "Q78021349",
+      "imdb": "tt6852910",
+      "tmdb": "76014",
+      "tvdb": "337399"
+    },
+    "note": "revisado a mano, comprobado en la ficha",
+    "verified": true,
+    "reject": false
   }
 ]
