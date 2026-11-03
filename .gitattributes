@@ -4,3 +4,6 @@
 data/**    text eol=lf
 report/**  text eol=lf
 mixnmatch/** text eol=lf
+
+# El texto legal de la licencia se guarda con los saltos de línea del original.
+LICENSE    text eol=lf

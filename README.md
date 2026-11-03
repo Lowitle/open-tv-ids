@@ -1,6 +1,7 @@
 # open-tv-ids
 
 [![build](https://github.com/Lowitle/open-tv-ids/actions/workflows/build.yaml/badge.svg)](https://github.com/Lowitle/open-tv-ids/actions/workflows/build.yaml)
+[![licencia: CC0 1.0](https://img.shields.io/badge/licencia-CC0%201.0-lightgrey.svg)](LICENSE)
 
 Dataset abierto de identificadores cruzados entre los catálogos de las plataformas de televisión a la
 carta y los catálogos internacionales de las obras. Un fichero por catálogo (`emitter`) y, dentro, una
@@ -319,9 +320,15 @@ con la evidencia y la sugerencia de cada uno, está en [`report/3cat/cobertura.m
 
 ## Licencia
 
-Los datos (`data/`, `report/`, `overrides/`) son **CC0 1.0** y el código es **MIT**; los detalles están en
-[`LICENSE`](LICENSE). Los identificadores vienen de Wikidata, que también es CC0; de Wikipedia solo se
-guarda el título del artículo citado en `sources`.
+Todo el repositorio —datos, informes y código— está dedicado al dominio público bajo **CC0 1.0 Universal**,
+igual que los datos de Wikidata de los que sale: se puede copiar, modificar, distribuir y usar
+comercialmente sin pedir permiso ni citar la fuente. El texto completo de la licencia está en
+[`LICENSE`](LICENSE).
+
+De Wikipedia solo se guarda el **título** del artículo citado en `sources`, que es un dato factual, nunca su
+texto (que sería CC BY-SA). Lo que CC0 no concede son derechos de patente ni de marca —aquí no hay patentes—
+y no está aprobada por la OSI, así que una política corporativa puede exigir para el código una licencia OSI
+(MIT, Apache): si llega el caso se cambia la del código, y los datos siguen en CC0.
 
 ## Hoja de ruta
 
