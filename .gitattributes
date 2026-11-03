@@ -5,5 +5,9 @@ data/**    text eol=lf
 report/**  text eol=lf
 mixnmatch/** text eol=lf
 
+# `overrides/<emitter>.json` también lo escribe la herramienta (`Overrides.Write`, ordenado por id), así
+# que tampoco puede volver como CRLF tras un `checkout`: el diff tocaría líneas que la persona no revisó.
+overrides/** text eol=lf
+
 # El texto legal de la licencia se guarda con los saltos de línea del original.
 LICENSE    text eol=lf
