@@ -1,6 +1,6 @@
 # Cobertura de identificadores externos · 3cat
 
-Generado el 2026-11-02 a partir de `3cat.csv` con `IdsBuilder`.
+Generado el 2026-11-09 a partir de `3cat.csv` con `IdsBuilder`.
 Fuente de los identificadores: Wikidata (CC0), leída a través de los artículos de Wikipedia y del identificador de la ficha del programa («P10356»).
 
 ## Totales
@@ -8,38 +8,39 @@ Fuente de los identificadores: Wikidata (CC0), leída a través de los artículo
 | Métrica | Programas | Porcentaje |
 | --- | ---: | ---: |
 | Programas procesados | 1.349 | 100,0 % |
-| Publicados en el dataset | 459 | 34,0 % |
-| En revisión | 60 | 4,4 % |
-| Sin coincidencia | 830 | 61,5 % |
+| Publicados en el dataset | 472 | 35,0 % |
+| En revisión | 38 | 2,8 % |
+| Sin coincidencia | 839 | 62,2 % |
+| Descartados a mano | 13 | 1,0 % |
 
-Umbrales: se publica desde 0,90 de confianza y se revisa desde 0,70. 1 registro viene de `overrides/3cat.json`.
+Umbrales: se publica desde 0,90 de confianza y se revisa desde 0,70. 24 registros vienen de `overrides/3cat.json`, 13 de ellos descartados.
 
-344 programas no se han buscado por título: Wikidata ya declara el identificador de su ficha («P10356»), así que el elemento sale de esa declaración y la ficha del emisor es la comprobación.
+345 programas no se han buscado por título: Wikidata ya declara el identificador de su ficha («P10356»), así que el elemento sale de esa declaración y la ficha del emisor es la comprobación.
 
 ## Identificadores publicados
 
 | Catálogo | Programas |
 | --- | ---: |
-| wikidata | 459 |
-| tmdb | 387 |
-| imdb | 384 |
-| tvdb | 329 |
+| wikidata | 472 |
+| imdb | 396 |
+| tmdb | 395 |
+| tvdb | 335 |
 
 ## Por categoría
 
 | Categoría | Procesados | Publicados | En revisión | Sin coincidencia | Con TMDB |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| (sin categoría) | 267 | 31 | 12 | 224 | 35 |
-| Sèrie | 245 | 179 | 7 | 59 | 168 |
-| Documental | 244 | 72 | 6 | 166 | 66 |
-| Actualitat | 186 | 36 | 5 | 145 | 25 |
-| Animació | 146 | 79 | 8 | 59 | 79 |
-| Entreteniment | 64 | 8 | 4 | 52 | 11 |
-| Concurs | 53 | 17 | 8 | 28 | 20 |
-| Magazín | 38 | 8 | 3 | 27 | 6 |
-| Esports | 34 | 2 | 2 | 30 | 1 |
+| (sin categoría) | 267 | 32 | 7 | 224 | 35 |
+| Sèrie | 245 | 181 | 5 | 59 | 168 |
+| Documental | 244 | 72 | 3 | 166 | 66 |
+| Actualitat | 186 | 38 | 3 | 145 | 25 |
+| Animació | 146 | 82 | 8 | 56 | 81 |
+| Entreteniment | 64 | 8 | 2 | 52 | 11 |
+| Concurs | 53 | 19 | 5 | 28 | 20 |
+| Magazín | 38 | 10 | 1 | 26 | 7 |
+| Esports | 34 | 2 | 1 | 30 | 1 |
 | Anime | 29 | 18 | 0 | 11 | 21 |
-| Humor | 27 | 9 | 4 | 14 | 8 |
+| Humor | 27 | 10 | 2 | 14 | 8 |
 | Música | 10 | 0 | 0 | 10 | 0 |
 | Teatre | 4 | 0 | 1 | 3 | 1 |
 | Especial | 1 | 0 | 0 | 1 | 0 |
@@ -80,32 +81,32 @@ Los 20 programas con más evidencia que no llegan al umbral:
 
 | Id | Programa | Confianza | Evidencia | Artículo |
 | --- | --- | ---: | --- | --- |
-| 52956 | 300 | 0,80 | título con calificador, calificador «film», TMDB | 300 (film) (en, Q131390) |
 | 73876 | A sang freda | 0,80 | título con calificador, calificador «pel·lícula de 1967», TMDB | A sang freda (pel·lícula de 1967) (ca, Q1722631) |
 | 67116 | Agent Binky: Mascotes de l'univers | 0,80 | título exacto, TMDB+TVDB | Agent Binky: Mascotes de l'univers (ca, Q85740087) |
 | 72336 | Amb l'aigua al coll | 0,80 | título con calificador, calificador «pel·lícula del 1983», TMDB | Amb l'aigua al coll (pel·lícula del 1983) (ca, Q1171640) |
-| 48556 | Barcelona, ciutat neutral | 0,80 | título exacto, IMDb, año 2011 | Barcelona ciutat neutral (ca, Q97156232) |
+| 52276 | Bubble Bip | 0,80 | título exacto, serie de televisión, año 2014 | Bubble Bip (ca, Q21081849) |
 | 71896 | Cal trobar la Sara | 0,80 | título exacto, TMDB | Cal trobar la Sara (ca, Q21091793) |
-| 158769214 | El club | 0,80 | título con calificador, calificador «2015 film», TMDB | The Club (2015 film) (en, Q18959440) |
-| 56016 | El dia de demà | 0,80 | título exacto, TMDB | El dia de demà (ca, Q14320) |
-| 39605 | El gran dictat | 0,80 | título exacto, TVDB | El gran dictat (ca, Q11918695) |
 | 65876 | El món prodigiós: Xangai, la llegenda de Ladydragon | 0,80 | título exacto, TMDB | El món prodigiós. Xangai, la llegenda de Ladydragon (ca, Q107493469) |
 | 72196 | El riu de la vida | 0,80 | título con calificador, calificador «pel·lícula de 1992», TMDB | El riu de la vida (pel·lícula de 1992) (ca, Q581906) |
-| 55536 | El sopar | 0,80 | título exacto, TMDB | El Sopar (en, Q5352203) |
-| 56816 | El talp | 0,80 | título exacto, TMDB | El talp (ca, Q681962) |
-| 60236 | Els Esclataneu | 0,80 | título exacto, TMDB+TVDB | Els esclataneu (ca, Q60742069) |
 | 65456 | Filiprim | 0,80 | título exacto, IMDb, año 1986 | Filiprim (ca, Q11922026) |
 | 69036 | Futbol modest | 0,80 | título exacto, serie de televisión, año 2024 | Futbol modest (ca, Q124432819) |
-| 59136 | Interiors | 0,80 | título exacto, TMDB | Interiors (ca, Q961403) |
-| 46236 | Km 0 | 0,80 | título con calificador, calificador «película», TMDB | Km. 0 (película) (es, Q5234857) |
-| 46336 | L'Endemà | 0,80 | título exacto, TMDB | L'endemà (es, Q19999744) |
-| 179709763 | L'illa del tresor | 0,80 | título con calificador, calificador «pel·lícula de 1934», TMDB | L'illa del tresor (pel·lícula de 1934) (ca, Q2634066) |
+| 73696 | L'il·lusionista | 0,80 | título exacto, TMDB | L'il·lusionista (ca, Q645735) |
+| 67076 | La mainadera ninja | 0,80 | título exacto, TMDB+TVDB | La mainadera ninja (ca, Q85310795) |
+| 76276 | La supervivent | 0,80 | título exacto, TMDB | La supervivent (ca, Q141416345) |
+| 74056 | Les Magilletres | 0,80 | título exacto, serie de televisión, año 1997 | Les Magilletres (ca, Q20103234) |
+| 63676 | Mironins | 0,80 | título exacto, TMDB | Mironins (ca, Q110777974) |
+| 58216 | Atrapa'm si pots | 0,70 | título exacto, año 2018 | Atrapa'm si pots (ca, Q20015444) |
+| 144823849 | Capelito | 0,70 | título parecido, TMDB, serie de televisión | Capelito. El bolet màgic (ca, Q2937261) |
+| 161337650 | Caçadors de bolets | 0,70 | título exacto, año 2004 | Caçadors de bolets (ca, Q20104105) |
+| 221468855 | Colors en sèrie | 0,70 | título exacto, IMDb | Colors en sèrie (ca, Q11914734) |
+| 3605 | Dawson creix | 0,70 | título parecido, TMDB+TVDB, serie de televisión | En Dawson creix (ca, Q461357) |
+| 50856 | Dinàmiks | 0,70 | título exacto, año 2013 | Dinàmiks (ca, Q137908583) |
 
 Para resolverlos de uno en uno, con los enlaces a la ficha del emisor y al elemento de Wikidata: `dotnet run --project src/IdsBuilder -- --check` (guarda cada decisión en `overrides/3cat.json`).
 
 ## Colaboración (Mix'n'match)
 
-`mixnmatch/3cat.tsv` es el catálogo entero en el formato que importa Mix'n'match: una fila por programa, con el slug de su ficha como `id`, la categoría y el título original en `desc` y el elemento en `q` o `autoq`. 1.349 fichas: 345 ya casadas con certeza, 114 por confirmar y 890 esperando a que alguien las case.
+`mixnmatch/3cat.tsv` es el catálogo entero en el formato que importa Mix'n'match: una fila por programa, con el slug de su ficha como `id`, la categoría y el título original en `desc` y el elemento en `q` o `autoq`. 1.336 fichas: 356 ya casadas con certeza, 116 por confirmar y 864 esperando a que alguien las case.
 
 El identificador de cada fila es el valor de `P10356`, así que el catálogo se importa con esa propiedad: cuando un voluntario casa una fila, Mix'n'match escribe el identificador en el elemento y el siguiente volcado publica el programa, sin buscar el título.
 
@@ -125,8 +126,8 @@ Series, animación y cine que no se han podido casar (primeros 20 por antigüeda
 | 46556 | Ermessenda | — | Ermessenda de Carcassona (ca) |
 | 46659 | La Lua i el món | — | K3 (ca) |
 | 46716 | Megaminimals | Megaminimals | Josep Lluís Viciana i Monfort (ca) |
-| 47176 | Els Extraordinaris | — | — |
-| 47536 | L'illa del far | L'illa del Far | — |
+| 47176 | Els Extraordinaris | — | Consistori papal (ca) |
+| 47536 | L'illa del far | L'illa del Far | Illes Cíes (ca) |
 | 47556 | Lila | Lila | Lila Kedrova (ca) |
 | 48636 | Benvinguts a Patatamón! | — | Canal 3XL (ca) |
 | 48916 | Lara, què fem? | Ask Lara | SX3 (ca) |
@@ -161,5 +162,5 @@ El título del catálogo se busca en la Wikipedia catalana; si no aparece, el t�
 
 Un año que no coincide no resta: la fecha del catálogo es la de alta en 3Cat, no la de estreno.
 
-Tiempo del volcado: 1:48.
+Tiempo del volcado: 0:00.
 
