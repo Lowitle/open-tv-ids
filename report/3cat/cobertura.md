@@ -1,6 +1,6 @@
 # Cobertura de identificadores externos · 3cat
 
-Generado el 2026-11-09 a partir de `3cat.csv` con `IdsBuilder`.
+Generado el 2026-11-16 a partir de `3cat.csv` con `IdsBuilder`.
 Fuente de los identificadores: Wikidata (CC0), leída a través de los artículos de Wikipedia y del identificador de la ficha del programa («P10356»).
 
 ## Totales
